@@ -1,0 +1,81 @@
+globalvar Player[] scoreboardArray = [];
+
+playervar Boolean __hideScoreboard;
+playervar Number __playerScore;
+playervar Number __previousScore;
+playervar Number __i;
+
+rule: "Create player line for Spec Scoreboard HUD"
+Event.OngoingPlayer
+{
+    // Spectator-only HUD
+    CreateHudText(LocalPlayer().__hideScoreboard ? null : LocalPlayer(), <"<0>", HeroIconString(HeroOf(EventPlayer()))>, "                                                                                                                             ", <"<0> - <1>", EventPlayer(), __playerScore>, Location.Top, IndexOfArrayValue(scoreboardArray, EventPlayer()) + -150, CustomColor(117, 167, 21, 255), Color.White, CustomColor(117, 167, 21, 255), HudTextRev.VisibleToSortOrderAndString, Spectators.VisibleAlways);
+    updateScoreboardForPlayer();
+}
+
+rule: "On disconnect, trigger update to remove player from scoreboard"
+Event.OnPlayerLeave
+{
+    updateScoreboardForPlayer();
+}
+
+rule: "Auto-update playerScore"
+Event.OngoingPlayer
+if (ArrayContains([GameMode.BountyHunter, GameMode.Deathmatch], CurrentGameMode()))
+if (ScoreOf(EventPlayer()) != __playerScore)
+{
+    __playerScore = ScoreOf(EventPlayer());
+}
+			
+rule: "Create Box / Push normal HUD down"
+{
+    // Create match timer
+    CreateHudText(
+        MatchTime() > 0 ? LocalPlayer() : null,
+        <"<0>:<1><2>",
+        RoundToInteger(MatchTime() / 60 % 60, Rounding.Down), MatchTime() % 60 < 10 ? 0 : "", RoundToInteger(MatchTime() % 60, Rounding.Down)>, null, null, Location.Top, -1 * 999, CustomColor(117, 167, 21, 255), null, null, HudTextRev.VisibleToAndString, Spectators.VisibleAlways);
+    // Scoreboard string + pushes player HUDs down
+    CreateHudText(null, null,"                                                                                                                     " , " \n\n\n\nScoreboard", Location.Top, -999, CustomColor(117, 167, 21, 255), Color.White, CustomColor(117, 167, 21, 255), HudTextRev.VisibleToSortOrderAndString, Spectators.VisibleAlways);
+    // CreateHudText(LocalPlayer().__hideScoreboard ? null : LocalPlayer(), null,"                                                                                                                     " , " \n", Location.Top, -999, CustomColor(117, 167, 21, 255), Color.White, CustomColor(117, 167, 21, 255), HudTextRev.VisibleToSortOrderAndString, Spectators.VisibleNever);
+    // Black box
+    CreateHudText(LocalPlayer().__hideScoreboard ? null : LocalPlayer(), "\n           \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", null, null, Location.Left, -2, null, null, null, HudTextRev.VisibleToSortOrderAndString, Spectators.VisibleAlways);
+    // Pushes default scoreboard and timer down for specs
+    CreateHudText(AllPlayers(), null, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", null, Location.Top, -1, null, null, null, HudTextRev.VisibleToSortOrderAndString, Spectators.VisibleAlways);
+}
+
+void updateScoreboardForPlayer() "SUB: Update scoreboardArray"
+{
+    ModifyVariable(scoreboardArray, Operation.RemoveFromArrayByValue, EventPlayer());
+    // If the player is no longer in the match, we are done
+    if (!ArrayContains(AllPlayers(Team.All), EventPlayer()))
+    {
+        Abort();
+    }
+    // If no one else is in the array, cannot do comparisons. Put the player in.
+    if (scoreboardArray == [])
+    {
+        scoreboardArray[0] = EventPlayer();
+        Abort();
+    }
+    // Determine where the player belongs in the array now
+    for (__i = 0; CountOf(scoreboardArray); 1)
+    {
+        // If the player should be before the current array element...
+        if (__playerScore > scoreboardArray[__i].__playerScore)
+        {
+            // ...then we should insert them just before the current array element
+            scoreboardArray = Append(Append(ArraySlice(scoreboardArray, 0, __i), EventPlayer()), ArraySlice(scoreboardArray, __i, CountOf(scoreboardArray) - __i));
+            Abort();
+        }
+    }
+    // If we haven't put the player into the array, then they are in last, and we should put them there.
+    scoreboardArray = Append(scoreboardArray, EventPlayer());
+}
+
+rule: "If a player's score has changed, update their position in the scoreboardArray"
+Event.OngoingPlayer
+if (__previousScore != __playerScore)
+{
+    updateScoreboardForPlayer();
+    __previousScore = __playerScore;
+}
