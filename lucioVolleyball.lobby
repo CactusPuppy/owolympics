@@ -1,0 +1,41 @@
+{
+  "Lobby": {
+    "Allow Players Who Are In Queue": true,
+    "Max Team 1 Players": 3,
+    "Max Team 2 Players": 3
+  },
+  "Modes": {
+    "All": {
+      "Allow Hero Switching": false,
+      "Enemy Health Bars": false,
+      "Game Mode Start": "Manual",
+      "Hero Limit": "Off",
+      "Kill Cam": false,
+      "Respawn As Random Hero": true,
+      "Respawn Time Scalar": 0.0
+    },
+    "Elimination": {
+      "Enabled Maps": [
+        "Workshop Island"
+      ],
+      "Capture Objective Tiebreaker": false,
+      "Draw After Match Time Elapsed With No Tiebreaker": 300,
+      "Reveal Heroes": true,
+      "Reveal Heroes After Match Time Elapsed": 0,
+      "Score To Win": 9.0,
+      "Tiebreaker After Match Time Elapsed": 300,
+      "Time To Capture": 1
+    }
+  },
+  "Heroes": {
+    "General": {
+      "Enabled Heroes": [
+        "Lúcio"
+      ],
+      "Lúcio": {
+        "Ultimate Generation (Sound Barrier)": 350.0
+      }
+    }
+  },
+  "Description": "Lucio VolleyBall                                        Credits : Dzem#21910                                                        Reddit : FoxEatsJam                               Special Thanks to Swaxa for testing.                                                                                                                                                                                           Hold Interact [F] in Game for Informations about Playing. Also Works for Workshop Chamber map!"
+}

@@ -1,0 +1,445 @@
+import "lucioVolleyball.lobby";
+
+globalvar define StartFlag;
+globalvar define BallDebug;
+globalvar define LastTouchTeam1;
+globalvar define LastTouchTeam2;
+playervar define TextEnt;
+playervar define TextEnt2;
+
+rule: "Effects"
+{
+    CreateBeamEffect(AllPlayers(Team.All), BeamType.BadBeam, Vector(-19.623, 3, -0.036), Vector(19.725, 3, 0.05), Color.White, EffectRev.VisibleToPositionAndRadius);
+    CreateBeamEffect(AllPlayers(Team.All), BeamType.BadBeam, Vector(-19.623, 1, -0.036), Vector(19.725, 1, 0.05), Color.White, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 0.2, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 0.5, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 0.8, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 1.1, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 1.4, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 1.7, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 2.1, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 2.4, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 2.7, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(-19.623, 3, -0.036), 0.3, EffectRev.VisibleToPositionAndRadius);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 0.2, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 0.5, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 0.8, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 1.1, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 1.4, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 1.7, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 2.1, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 2.4, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 2.7, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.White, Vector(19.725, 3, 0.05), 0.3, EffectRev.VisibleToPositionAndRadius);
+    DisableAnnouncer();
+    DisableCompletion();
+    DisableScoring();
+    StartFlag = false;
+    DisableRespawning(AllPlayers(Team.All));
+}
+
+rule: "Team 1 Net"
+Event.OngoingPlayer
+Team.Team1
+Player.Lucio
+if (ZOf(PositionOf(EventPlayer())) <= ZOf(EventPlayer()) + 1)
+{
+    ApplyImpulse(EventPlayer(), Vector(0, YOf(PositionOf(EventPlayer())), 5), 20, Relative.ToWorld, ContraryMotion.Cancel);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "Team 2 Net"
+Event.OngoingPlayer
+Team.Team2
+Player.Lucio
+if (ZOf(PositionOf(EventPlayer())) >= ZOf(EventPlayer()) + -1)
+{
+    ApplyImpulse(EventPlayer(), Vector(0, YOf(PositionOf(EventPlayer())), -5), 20, Relative.ToWorld, ContraryMotion.Cancel);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "Team 1 Ultimate"
+Event.OngoingPlayer
+Team.Team1
+Player.Lucio
+if (IsUsingUltimate(EventPlayer()) == true)
+{
+    SkipIf(NumberOfLivingPlayers(Team.All) <= 3, 1);
+    SetMoveSpeed(AllPlayers(Team.Team1), 200);
+    SkipIf(NumberOfLivingPlayers(Team.All) > 3, 1);
+    SetMoveSpeed(PlayersOnHero(Hero.Lucio, Team.Team1), 250);
+    Wait(6, WaitBehavior.IgnoreCondition);
+    SkipIf(NumberOfLivingPlayers(Team.All) <= 3, 1);
+    SetMoveSpeed(PlayersOnHero(Hero.Lucio, Team.Team1), 150);
+    SkipIf(NumberOfLivingPlayers(Team.All) > 3, 1);
+    SetMoveSpeed(PlayersOnHero(Hero.Lucio, Team.Team1), 180);
+}
+
+rule: "Team 2 Ultimate"
+Event.OngoingPlayer
+Team.Team2
+Player.Lucio
+if (IsUsingUltimate(EventPlayer()) == true)
+{
+    SkipIf(NumberOfLivingPlayers(Team.All) <= 3, 1);
+    SetMoveSpeed(AllPlayers(Team.Team2), 200);
+    SkipIf(NumberOfLivingPlayers(Team.All) > 3, 1);
+    SetMoveSpeed(AllPlayers(Team.Team2), 250);
+    Wait(6, WaitBehavior.IgnoreCondition);
+    SkipIf(NumberOfLivingPlayers(Team.All) <= 3, 1);
+    SetMoveSpeed(AllPlayers(Team.Team2), 150);
+    SkipIf(NumberOfLivingPlayers(Team.All) > 3, 1);
+    SetMoveSpeed(AllPlayers(Team.Team2), 180);
+}
+
+rule: "Team 1 Setup"
+Event.OngoingPlayer
+Team.Team1
+Player.Lucio
+if (HasSpawned(EventPlayer()) == true)
+{
+    DestroyHudText(TextEnt);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    SetMoveSpeed(EventPlayer(), 150);
+    Teleport(EventPlayer(), Vector(0, 0, 8));
+    SetStatus(EventPlayer(), null, Status.Invincible, 9999);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    SetAbility1Enabled(EventPlayer(), false);
+    SetPrimaryFireEnabled(EventPlayer(), false);
+    CreateHudText(EventPlayer(), null, null, "Hold Interact [F] For Informations", Location.Left, 0, Color.White, Color.White, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextEnt = LastTextID();
+}
+
+rule: "Team 2 Setup"
+Event.OngoingPlayer
+Team.Team2
+Player.Lucio
+if (HasSpawned(EventPlayer()) == true)
+{
+    DestroyHudText(TextEnt);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    SetMoveSpeed(EventPlayer(), 150);
+    Teleport(EventPlayer(), Vector(0, 0, -8));
+    SetStatus(EventPlayer(), null, Status.Invincible, 9999);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    SetAbility1Enabled(EventPlayer(), false);
+    SetPrimaryFireEnabled(EventPlayer(), false);
+    CreateHudText(EventPlayer(), null, null, "Hold Interact [F] For Informations", Location.Left, 0, Color.White, Color.White, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextEnt = LastTextID();
+    Wait(6, WaitBehavior.IgnoreCondition);
+    SetUltimateCharge(EventPlayer(), 100);
+}
+
+globalvar Player ballBot;
+
+rule: "Wrecking Ball Spawn"
+{
+    Wait(3, WaitBehavior.IgnoreCondition);
+    CreateDummyBot(Hero.WreckingBall, Team.Team1, 3, Vector(0, 0, 8), Vector(0, 0, 0));
+    ballBot = LastCreatedEntity();
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    BallDebug = true;
+}
+
+rule: "Wrecking Ball Setup"
+Event.OngoingPlayer
+Team.Team1
+Player.WreckingBall
+if (HasSpawned(EventPlayer()) == true)
+{
+    SetGravity(EventPlayer(), 0);
+    SetMoveSpeed(EventPlayer(), 0);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    SetStatus(EventPlayer(), null, Status.Invincible, 9999);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    PressButton(EventPlayer(), Button.Ability1);
+}
+
+rule: "Boop Impulse (Team 1)"
+Event.OngoingPlayer
+Team.Team1
+Player.Lucio
+if (DistanceBetween(EventPlayer(), ballBot) <= 5)
+if (IsInViewAngle(EventPlayer(), ballBot, 45) == true)
+if (IsFiringSecondary(EventPlayer()) == true)
+if (BallDebug == false)
+{
+    ApplyImpulse(ballBot, FacingDirectionOf(EventPlayer()), 17, Relative.ToWorld, ContraryMotion.Cancel);
+    LastTouchTeam1 = true;
+    LastTouchTeam2 = false;
+    SetUltimateCharge(EventPlayer(), UltimateChargePercent(EventPlayer()) + 10);
+    Wait(0.75, WaitBehavior.IgnoreCondition);
+}
+
+rule: "Melee Impulse (Team 1)"
+Event.OngoingPlayer
+Team.Team1
+Player.Lucio
+if (DistanceBetween(EventPlayer(), ballBot) <= 2.75)
+if (IsButtonHeld(EventPlayer(), Button.Melee) == true)
+if (BallDebug == false)
+{
+    ApplyImpulse(ballBot, FacingDirectionOf(EventPlayer()), 15, Relative.ToWorld, ContraryMotion.Cancel);
+    LastTouchTeam1 = true;
+    LastTouchTeam2 = false;
+    SetUltimateCharge(EventPlayer(), UltimateChargePercent(EventPlayer()) + 7);
+    Wait(0.75, WaitBehavior.IgnoreCondition);
+}
+
+rule: "Boop Impulse (Team 2)"
+Event.OngoingPlayer
+Team.Team2
+Player.Lucio
+if (DistanceBetween(EventPlayer(), ballBot) <= 5)
+if (IsInViewAngle(EventPlayer(), ballBot, 45) == true)
+if (IsFiringSecondary(EventPlayer()) == true)
+if (BallDebug == false)
+{
+    ApplyImpulse(ballBot, FacingDirectionOf(EventPlayer()), 17, Relative.ToWorld, ContraryMotion.Cancel);
+    LastTouchTeam2 = true;
+    LastTouchTeam1 = false;
+    SetUltimateCharge(EventPlayer(), UltimateChargePercent(EventPlayer()) + 10);
+    Wait(0.75, WaitBehavior.IgnoreCondition);
+}
+
+rule: "Melee Impulse (Team 2)"
+Event.OngoingPlayer
+Team.Team2
+Player.Lucio
+if (DistanceBetween(EventPlayer(), ballBot) <= 2.75)
+if (IsButtonHeld(EventPlayer(), Button.Melee) == true)
+if (BallDebug == false)
+{
+    ApplyImpulse(ballBot, FacingDirectionOf(EventPlayer()), 15, Relative.ToWorld, ContraryMotion.Cancel);
+    LastTouchTeam2 = true;
+    LastTouchTeam1 = false;
+    SetUltimateCharge(EventPlayer(), UltimateChargePercent(EventPlayer()) + 7);
+    Wait(0.75, WaitBehavior.IgnoreCondition);
+}
+
+rule: "Countdown"
+if (IsTrueForAll(AllPlayers(), HasSpawned(ArrayElement())) == true)
+{
+    Wait(1, WaitBehavior.IgnoreCondition);
+    BallDebug = true;
+    BigMessage(AllPlayers(Team.All), "5");
+    Wait(1, WaitBehavior.IgnoreCondition);
+    BigMessage(AllPlayers(Team.All), "4");
+    Wait(1, WaitBehavior.IgnoreCondition);
+    BigMessage(AllPlayers(Team.All), "3");
+    Wait(1, WaitBehavior.IgnoreCondition);
+    BigMessage(AllPlayers(Team.All), "2");
+    Wait(1, WaitBehavior.IgnoreCondition);
+    BigMessage(AllPlayers(Team.All), "1");
+    Wait(4, WaitBehavior.IgnoreCondition);
+    Start();
+    StartFlag = true;
+    AllowButton(AllPlayers(Team.All), Button.Melee);
+    Wait(10000, WaitBehavior.IgnoreCondition);
+}
+
+void Start() "Start"
+{
+    BallDebug = false;
+    ApplyImpulse(ballBot, Vector(0, 8, 7), 10, Relative.ToWorld, ContraryMotion.Cancel);
+    SetMoveSpeed(ballBot, 100);
+    SetGravity(ballBot, 80);
+}
+
+void Start2() "Start 2"
+{
+    BallDebug = false;
+    SetMoveSpeed(ballBot, 100);
+    SetGravity(ballBot, 80);
+    ApplyImpulse(ballBot, Vector(0, 8, -7), 10, Relative.ToWorld, ContraryMotion.Cancel);
+}
+
+rule: "Team 1 Score"
+if (IsOnGround(ballBot) == true)
+if (ZOf(PositionOf(ballBot)) <= ZOf(ballBot) + 1)
+if (StartFlag == true)
+{
+    Wait(0.15, WaitBehavior.IgnoreCondition);
+    AbortIfConditionIsFalse();
+    SetMoveSpeed(PlayersOnHero(Hero.WreckingBall, Team.Team1), 0);
+    SetGravity(PlayersOnHero(Hero.WreckingBall, Team.Team1), 0);
+    BigMessage(AllPlayers(Team.Team1), "Your Team Scores!");
+    BigMessage(AllPlayers(Team.Team2), "Enemy Team Scores!");
+    ModifyTeamScore(Team.Team1, 1);
+    BallDebug = true;
+    Wait(2, WaitBehavior.IgnoreCondition);
+    Start();
+}
+
+rule: "Team 2 Score"
+if (IsOnGround(ballBot) == true)
+if (ZOf(PositionOf(ballBot)) >= ZOf(ballBot) + 1)
+if (StartFlag == true)
+{
+    Wait(0.15, WaitBehavior.IgnoreCondition);
+    AbortIfConditionIsFalse();
+    SetMoveSpeed(ballBot, 0);
+    SetGravity(ballBot, 0);
+    BigMessage(AllPlayers(Team.Team2), "Your Team Scores!");
+    BigMessage(AllPlayers(Team.Team1), "Enemy Team Scores!");
+    ModifyTeamScore(Team.Team2, 1);
+    BallDebug = true;
+    Wait(2, WaitBehavior.IgnoreCondition);
+    Start2();
+}
+
+rule: "Team 1 Score (2)"
+if (PlayersWithinRadius(Vector(XOf(PositionOf(ballBot)), -4, ZOf(PositionOf(ballBot))), 3.125, Team.All, RadiusLOS.Off) == true)
+if (StartFlag == true)
+if (LastTouchTeam2 == true)
+if (LastTouchTeam1 == false)
+{
+    Wait(0.2, WaitBehavior.IgnoreCondition);
+    AbortIfConditionIsFalse();
+    SetMoveSpeed(PlayersOnHero(Hero.WreckingBall, Team.Team1), 0);
+    SetGravity(PlayersOnHero(Hero.WreckingBall, Team.Team1), 0);
+    BigMessage(AllPlayers(Team.Team1), "Your Team Scores!");
+    BigMessage(AllPlayers(Team.Team2), "Enemy Team Scores!");
+    ModifyTeamScore(Team.Team1, 1);
+    BallDebug = true;
+    Wait(2, WaitBehavior.IgnoreCondition);
+    Start();
+}
+
+rule: "Team 2 Score (2)"
+if (PlayersWithinRadius(Vector(XOf(PositionOf(ballBot)), -4, ZOf(PositionOf(ballBot))), 3.25, Team.All, RadiusLOS.Off) == true)
+if (StartFlag == true)
+if (LastTouchTeam1 == true)
+if (LastTouchTeam2 == false)
+{
+    Wait(0.2, WaitBehavior.IgnoreCondition);
+    AbortIfConditionIsFalse();
+    SetMoveSpeed(PlayersOnHero(Hero.WreckingBall, Team.Team1), 0);
+    SetGravity(PlayersOnHero(Hero.WreckingBall, Team.Team1), 0);
+    BigMessage(AllPlayers(Team.Team2), "Your Team Scores!");
+    BigMessage(AllPlayers(Team.Team1), "Enemy Team Scores!");
+    ModifyTeamScore(Team.Team2, 1);
+    BallDebug = true;
+    Wait(2, WaitBehavior.IgnoreCondition);
+    Start2();
+}
+
+rule: "Ball Net (Team 1 Side)"
+Event.OngoingPlayer
+Team.Team1
+Player.WreckingBall
+if (XOf(PositionOf(EventPlayer())) > 20 * ZOf(PositionOf(EventPlayer())) + -30)
+{
+    SkipIf(YOf(PositionOf(EventPlayer())) >= 2.5, 1);
+    ApplyImpulse(EventPlayer(), DirectionTowards(EventPlayer(), Vector(0, 3, 20)), 8, Relative.ToWorld, ContraryMotion.Cancel);
+}
+
+rule: "Ball Net (Team 2 Side)"
+Event.OngoingPlayer
+Team.Team1
+Player.WreckingBall
+if (XOf(PositionOf(EventPlayer())) > -20 * ZOf(PositionOf(EventPlayer())) + -30)
+{
+    SkipIf(YOf(PositionOf(EventPlayer())) >= 2.5, 1);
+    ApplyImpulse(EventPlayer(), DirectionTowards(EventPlayer(), Vector(0, 3, -20)), 8, Relative.ToWorld, ContraryMotion.Cancel);
+}
+
+rule: "Ball Debug"
+Event.OngoingPlayer
+Team.Team1
+Player.WreckingBall
+if (BallDebug == true)
+{
+    Teleport(EventPlayer(), Vector(0, 4.5, 0));
+    Wait(0.05, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "Balanced 1v1"
+Event.OngoingPlayer
+if (NumberOfLivingPlayers(Team.All) >= 3)
+if (HasSpawned(EventPlayer()) == true)
+{
+    SetMoveSpeed(EventPlayer(), 180);
+}
+
+rule: "Debug 1"
+Event.OngoingPlayer
+Team.Team1
+Player.Lucio
+if (PlayersWithinRadius(Vector(XOf(PositionOf(EventPlayer())), -2, ZOf(PositionOf(EventPlayer()))), 1.25, Team.All, RadiusLOS.Off) == true)
+{
+    Teleport(EventPlayer(), Vector(0, 0, 8));
+}
+
+rule: "Debug 2"
+Event.OngoingPlayer
+Team.Team2
+Player.Lucio
+if (PlayersWithinRadius(Vector(XOf(PositionOf(EventPlayer())), -2, ZOf(PositionOf(EventPlayer()))), 1.25, Team.All, RadiusLOS.Off) == true)
+{
+    Teleport(EventPlayer(), Vector(0, 0, -8));
+}
+
+rule: "Debug 3"
+if (TeamScore(Team.Team1) == 9)
+{
+    DestroyAllDummyBots();
+    DeclareTeamVictory(Team.Team1);
+}
+
+rule: "Debug 4"
+if (TeamScore(Team.Team2) == 9)
+{
+    DestroyAllDummyBots();
+    DeclareTeamVictory(Team.Team2);
+}
+
+rule: "Debug 5"
+Event.OngoingPlayer
+if (IsDead(EventPlayer()) == true)
+{
+    Respawn(EventPlayer());
+}
+
+rule: "Debug 6"
+Event.OngoingPlayer
+if (NumberOfLivingPlayers(Team.All) > 3)
+{
+    SetMoveSpeed(PlayersOnHero(Hero.Lucio, Team.All), 150);
+}
+
+rule: "Text"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+{
+    DestroyHudText(TextEnt);
+    Wait(0.05, WaitBehavior.IgnoreCondition);
+    CreateHudText(EventPlayer(), null, null, "About the game", Location.Left, 0, Color.White, Color.White, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextEnt2 = LastTextID();
+    CreateHudText(EventPlayer(), null, "The rules are the same as\r\nin usual volleyball, to\r\nbounce the ball you need\r\nto boop it (Right Click)\r\nor punch it with melee", null, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextEnt = LastTextID();
+    Text();
+}
+
+void Text() "Text 2"
+{
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    SkipIf(IsButtonHeld(EventPlayer(), Button.Interact) == true, 5);
+    DestroyHudText(TextEnt);
+    DestroyHudText(TextEnt2);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    CreateHudText(EventPlayer(), null, null, "Hold Interact [F] For Informations", Location.Left, 0, Color.White, Color.White, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextEnt = LastTextID();
+    LoopIfConditionIsTrue();
+}
+
+rule: "Skip the POTG"
+if (IsMatchComplete())
+{
+    Wait(8);
+    ReturnToLobby();
+}
