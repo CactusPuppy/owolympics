@@ -1,0 +1,849 @@
+import "hanzoArchery.lobby";
+
+globalvar define BallRadius;
+globalvar define BallPositions;
+globalvar define GridPositions;
+globalvar define Mode;
+globalvar define GridLoopZ;
+globalvar define GridLoopY;
+globalvar define GridStart;
+globalvar define GridDone;
+globalvar define RandomLoop;
+globalvar define GridNumberOfBalls;
+globalvar define IsInPregame;
+globalvar define RandomBalls;
+globalvar define NeedToWalk;
+globalvar define CountdownActive;
+globalvar define CountdownSphereEffect;
+globalvar define SelectedBallRadius;
+globalvar define SpawnPosition;
+globalvar define NoiseEffect;
+globalvar define PositiveOrNegative;
+globalvar define MovingTime;
+globalvar define MovingDirection;
+globalvar define HealthyTargets;
+globalvar define CurrentTargetHealth;
+globalvar define EffectsArray;
+globalvar define BotsArray;
+globalvar define Loop;
+globalvar define ColorSelectBubblePositions;
+globalvar define BubbleColor;
+globalvar define ModeSelectBubblePositions;
+globalvar define ModifierSelectBubblePositions;
+globalvar define SizeBubblePositions;
+playervar define ShotsFired;
+playervar define ShotsLanded;
+playervar define ReactionTimeArray;
+playervar define CurrentReactionTime;
+playervar define AverageReactionTime;
+playervar define CalculateAverageReactionTimeLoop;
+playervar define RaycastBubbleSelect;
+playervar define CurrentBubbleHealth;
+
+disabled rule: "------------------------------------------- Initialise"
+{
+}
+
+rule: "Initialise"
+{
+    // DisableInspectorRecording();
+    DisableMusic();
+    BallRadius = 0.2;
+    SelectedBallRadius = BallRadius;
+    Mode = 2;
+    GridStart = Vector(-8, 1.5, 0);
+    GridNumberOfBalls = 4;
+    IsInPregame = true;
+    NeedToWalk = false;
+    SpawnPosition = Vector(0, 1.5, 0);
+    PositiveOrNegative = [1, -1];
+    CurrentTargetHealth = 0;
+}
+
+rule: "Teleport player"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()) == true)
+{
+    Teleport(EventPlayer(), SpawnPosition);
+}
+
+rule: "Back to menu"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+{
+    IsInPregame = true;
+    ClearStatus(EventPlayer(), Status.Rooted);
+}
+
+disabled rule: "Swap hero"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+if (IsButtonHeld(EventPlayer(), Button.Reload) == true)
+if (IsButtonHeld(EventPlayer(), Button.Jump) == true)
+{
+    SetAllowedHeroes(EventPlayer(), RemoveFromArray(AllHeroes(), HeroOf(EventPlayer())));
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    ResetHeroAvailability(EventPlayer());
+}
+
+disabled rule: "------------------------------------------- HUD"
+{
+}
+
+rule: "HUD - Accuracy + Setup"
+Event.OngoingPlayer
+{
+    CreateHudText(EventPlayer(), null, null, <"Score: <0>", ShotsLanded>, Location.Top, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray((IsInPregame && CountOf(ReactionTimeArray) > 1) == true, true), null, null, <"Avg. Reaction time during last run: <0>", AverageReactionTime>, Location.Top, 2, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "HUD - Controls"
+{
+    CreateHudText(AllPlayers(Team.All), null, <"<0> + <1> to go back to the menu", InputBindingString(Button.Crouch), InputBindingString(Button.Interact)>, null, Location.Right, -5, Color.White, Color.Blue, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(AllPlayers(Team.All), null, <"<0> + <1> + <2> to swap heroes", InputBindingString(Button.Crouch), InputBindingString(Button.Jump), InputBindingString(Button.Reload)>, null, Location.Right, -4, Color.White, Color.SkyBlue, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "HUD - Workshop.codes link"
+{
+    CreateHudText(AllPlayers(Team.All), null, null, "Workshop.codes/aimlabs", Location.Top, 0, Color.White, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+disabled rule: "----------------------------------------- Pregame"
+{
+}
+
+rule: "Pregame HUD"
+{
+    # Press interact to select button
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, null, <"Press <0> on a bubble to select", InputBindingString(Button.Interact)>, Location.Top, 5, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    # Blurb about walking around
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, "You can walk around freely, but you will be rooted when you start", null, Location.Top, 6, Color.White, Color.SkyBlue, Color.SkyBlue, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), IsInPregame), null, " ", " ", Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "Pregame In-world"
+{
+    # --- Select mode
+    // CreateIcon(FilteredArray(AllPlayers(Team.All), IsInPregame), Vector(-20, 12, 0), Icon.Asterisk, IconRev.VisibleToPositionAndColor, Color.White, true);
+    // CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Select mode", Vector(-20, 12, 0), 2, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    // CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Modes", Vector(-20, 10, 5), 1.5, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.Gray, Spectators.DefaultVisibility);
+    // CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Modifiers", Vector(-20, 10, -5), 1.5, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.Gray, Spectators.DefaultVisibility);
+    # --- Customise target
+    CreateIcon(FilteredArray(AllPlayers(Team.All), IsInPregame), Vector(0, 12, -20), Icon.Circle, IconRev.VisibleToPositionAndColor, BubbleColor, true);
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Customise target", Vector(0, 12, -20), 2, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, BubbleColor, Vector(0, 5, -15), BallRadius, EffectRev.VisibleToPositionRadiusAndColor);
+    # -- Destroy to start
+    CreateInWorldText(IsInPregame, "Destroy me to start", BallPositions[0], 1, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.Turquoise, Spectators.DefaultVisibility);
+    # Aim
+    CreateInWorldText(FilteredArray(IsInPregame, true), "Aim Training Labs", Vector(-16, 16, 0), 5, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, CustomColor(14, 199, 255, 255), Spectators.DefaultVisibility);
+    CreateInWorldText(FilteredArray(IsInPregame, true), "Workshop.codes/aimlabs", Vector(-16, 15, 0), 2, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    CreateInWorldText(FilteredArray(IsInPregame, true), "Made by Mitsiee", Vector(-16, 14, 0), 1, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, CustomColor(180, 180, 180, 255), Spectators.DefaultVisibility);
+}
+
+rule: "Is in pregame"
+Event.OngoingPlayer
+if (IsInPregame == true)
+if (HasSpawned(EventPlayer()) == true)
+if (IsAssemblingHeroes() != true)
+{
+    BallPositions = [];
+    BallPositions = Append(BallPositions, Vector(-12, 1.5, 0));
+    TeleportBots();
+    SetMatchTime(3599);
+}
+
+rule: "Is not in pregame"
+Event.OngoingPlayer
+if (IsInPregame != true)
+{
+}
+
+rule: "Interact to ray cast bubble select"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+{
+    RaycastBubbleSelect = RayCastHitPosition(EyePosition(EventPlayer()), EyePosition(EventPlayer()) + FacingDirectionOf(EventPlayer()) * 100, null, AllPlayers(Team.All), false);
+    MinWait();
+    RaycastBubbleSelect = Vector(0, 0, 0);
+}
+
+rule: "Start selected mode"
+Event.OnDamageDealt
+if (IsInPregame == true)
+{
+    IsInPregame = false;
+}
+
+disabled rule: "---------------------------------------- Reaction time"
+{
+}
+
+void ChaseReactionTime() "Subroutine - Start chase on reaction time array"
+{
+    ReactionTimeArray = [];
+    ChaseVariableAtRate(CurrentReactionTime, 1000, 1, RateChaseReevaluation.DestinationAndRate);
+}
+
+rule: "Add to reaction time array"
+Event.OngoingPlayer
+if ((HeroOf(EventPlayer()) == Hero.Mei && IsFiringSecondary(EventPlayer()) || HeroOf(EventPlayer()) != Hero.Mei && IsFiringPrimary(EventPlayer())) == true)
+if (IsInPregame != true)
+{
+    ReactionTimeArray = Append(ReactionTimeArray, CurrentReactionTime);
+    CurrentReactionTime = 0;
+}
+
+rule: "Calculate average reaction time"
+Event.OngoingPlayer
+if (IsInPregame == true)
+if (CountOf(ReactionTimeArray) > 1)
+{
+    for (CalculateAverageReactionTimeLoop = 0; CountOf(ReactionTimeArray); 1)
+    {
+        AverageReactionTime += ReactionTimeArray[CalculateAverageReactionTimeLoop];
+    }
+    AverageReactionTime /= CountOf(ReactionTimeArray);
+    CurrentReactionTime = 1000;
+}
+
+disabled rule: "---------------------------------------- Mode is about to start"
+{
+}
+
+rule: "Countdown"
+Event.OngoingPlayer
+if (IsInPregame != true)
+if (IsDummyBot(EventPlayer()) != true)
+{
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.Aqua, EventPlayer(), 2, EffectRev.VisibleToPositionAndRadius);
+    CountdownSphereEffect = LastCreatedEntity();
+    Wait(0.05, WaitBehavior.IgnoreCondition);
+    CountdownActive = true;
+    ShotsFired = 0;
+    ShotsLanded = 0;
+    SetPrimaryFireEnabled(EventPlayer(), false);
+    SetSecondaryFireEnabled(EventPlayer(), false);
+    Communicate(EventPlayer(), Communication.Countdown);
+    SmallMessage(AllPlayers(Team.All), "3...");
+    Wait(1, WaitBehavior.IgnoreCondition);
+    SmallMessage(AllPlayers(Team.All), "2...");
+    Wait(1, WaitBehavior.IgnoreCondition);
+    SmallMessage(AllPlayers(Team.All), "1...");
+    Wait(1, WaitBehavior.IgnoreCondition);
+    SmallMessage(AllPlayers(Team.All), "GO!");
+    PlayEffect(AllPlayers(Team.All), PlayEffect.RingExplosionSound, Color.White, EventPlayer(), 100);
+    // EnableFire();
+    CountdownActive = false;
+    DestroyEffect(CountdownSphereEffect);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.RingExplosion, Color.Aqua, EventPlayer(), 10);
+    SetPrimaryFireEnabled(EventPlayer(), true);
+    SetSecondaryFireEnabled(EventPlayer(), true);
+}
+
+disabled rule: "--------------------------------------Timer"
+{
+}
+
+rule: "Start Timer"
+Event.OngoingPlayer
+if (IsInPregame != true)
+if (CountdownActive != true)
+if (IsDummyBot(EventPlayer()) != true)
+{
+    # Root player
+    SetStatus(EventPlayer(), null, Status.Rooted, 9999);
+    Wait(0.05, WaitBehavior.AbortWhenFalse);
+    # Start timer according to workshop setting
+    // SetMatchTime(WorkshopSettingInteger("Timer", "Time per round", 60, 10, 180, 0) + 0.5);
+    SetMatchTime(60.5);
+    # Reset reaction time
+    CurrentReactionTime = 0;
+    # Start chasing reaction time
+    ChaseReactionTime();
+    # Reset target health, in case of healthy targets
+    ResetTargetHealth();
+}
+
+rule: "End of timer"
+Event.OngoingPlayer
+if (MatchTime() < 0.5)
+if (IsDummyBot(EventPlayer()) != true)
+{
+    SetMatchTime(3599);
+    CountdownActive = true;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.RingExplosion, Color.Red, EventPlayer(), 10);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.RingExplosionSound, Color.White, EventPlayer(), 100);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.Red, EventPlayer(), 2, EffectRev.VisibleToPositionAndRadius);
+    CountdownSphereEffect = LastCreatedEntity();
+    SetPrimaryFireEnabled(EventPlayer(), false);
+    SetSecondaryFireEnabled(EventPlayer(), false);
+    Wait(3, WaitBehavior.IgnoreCondition);
+    SetPrimaryFireEnabled(EventPlayer(), true);
+    SetSecondaryFireEnabled(EventPlayer(), true);
+    ClearStatus(EventPlayer(), Status.Rooted);
+    DestroyEffect(CountdownSphereEffect);
+    IsInPregame = true;
+    CountdownActive = false;
+    CurrentReactionTime = 1000;
+    ResetTargetHealth();
+}
+
+disabled rule: "------------------------------------------- Bubbles"
+{
+}
+
+rule: "Create bubble effects & dummy bots"
+{
+    EffectsArray = [];
+    BotsArray = [];
+    for (Loop = 0; 5; 1)
+    {
+        CreateDummyBot(Hero.WreckingBall, Team.Team2, -1, Vector(1, 45, 1), Vector(0, 0, 0));
+        BotsArray = Append(BotsArray, LastCreatedEntity());
+        CreateEffect(FilteredArray(AllPlayers(Team.All), CountOf(BallPositions) > EvaluateOnce(Loop)), Effect.Sphere, BubbleColor, BallPositions[EvaluateOnce(Loop)], BallRadius, EffectRev.VisibleToPositionRadiusAndColor);
+        EffectsArray = Append(EffectsArray, LastCreatedEntity());
+    }
+}
+
+rule: "Set dummy bot status"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (HasSpawned(EventPlayer()) == true)
+{
+    Wait(2, WaitBehavior.IgnoreCondition);
+    Teleport(EventPlayer(), Vector(0, 45, 0));
+    SetStatus(EventPlayer(), null, Status.Rooted, 9999);
+    PressButton(EventPlayer(), Button.Ability1);
+    SetGravity(EventPlayer(), 0);
+    StartScalingPlayer(EventPlayer(), BallRadius * 1.2, true);
+    SetDamageReceived(EventPlayer(), 0.1);
+    SetKnockbackReceived(EventPlayer(), 0);
+    SetInvisible(EventPlayer(), InvisibleTo.All);
+    DisableMovementCollisionWithPlayers(EventPlayer());
+    DisableMovementCollisionWithEnvironment(EventPlayer(), false);
+}
+
+rule: "Create pregame bubble"
+if (IsInPregame == true)
+if (CountOf(BallPositions) == 0)
+{
+    BallPositions = [];
+    BallPositions = Append(BallPositions, Vector(-12, 1.5, 0));
+    TeleportBots();
+}
+
+rule: "Bubble takes damage"
+Event.OnDamageTaken
+if (IsDummyBot(EventPlayer()) == true)
+{
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, BubbleColor, BallPositions[IndexOfArrayValue(BotsArray, EventPlayer())], 0.5);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BadExplosion, BubbleColor, BallPositions[IndexOfArrayValue(BotsArray, EventPlayer())], 0.5);
+    # Increment score
+    Attacker().ShotsLanded += 1;
+    # Heal bot, just in case
+    Heal(EventPlayer(), null, 1000);
+    if (HealthyTargets)
+    {
+        CurrentBubbleHealth -= 1;
+        if (CurrentBubbleHealth == 0)
+        {
+            SetBallSize();
+            CurrentBubbleHealth = 4;
+            # Remove effect by displacing it and it's bot
+            BallPositions = RemoveFromArray(BallPositions, BallPositions[IndexOfArrayValue(BotsArray, EventPlayer())]);
+            Teleport(EventPlayer(), Vector(0, 50, 0));
+        }
+    }
+    else
+    {
+        SetBallSize();
+        # Remove effect by displacing it and it's bot
+        BallPositions = RemoveFromArray(BallPositions, BallPositions[IndexOfArrayValue(BotsArray, EventPlayer())]);
+        Teleport(EventPlayer(), Vector(0, 50, 0));
+    }
+}
+
+void TeleportBots() "Subroutine [TeleportBots] - Teleport dummy bots to bubble locations"
+{
+    for (Loop = 0; CountOf(BotsArray); 1)
+    {
+        if (BallPositions[Loop] == true)
+        {
+            if (RandomBalls)
+            {
+                Wait(0.1, WaitBehavior.IgnoreCondition);
+            }
+            Teleport(BotsArray[Loop], BallPositions[Loop] + Vector(0, BallRadius * 1.34 * -1, 0));
+        }
+        else
+        {
+            Teleport(BotsArray[Loop], Vector(0, 50, 0));
+        }
+    }
+}
+
+disabled rule: "----------------------------------------- Grid mode = 0"
+{
+}
+
+disabled rule: "Create grid mode select bubble"
+{
+    # Create array for positions of color select effects
+    ModeSelectBubblePositions[0] = Vector(-20, 10, 5);
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Grid", ModeSelectBubblePositions[0] + Vector(0, -1.25, -1.5), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Mode == 0 ? Color.Green : Color.White, Spectators.DefaultVisibility);
+    # Create effects
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Mode == 0 ? Color.Green : Color.White, ModeSelectBubblePositions[0], 0.75, EffectRev.VisibleToAndColor);
+}
+
+disabled rule: "Select grid mode"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ModeSelectBubblePositions[0]) < 0.75)
+{
+    Mode = 0;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, ModeSelectBubblePositions[0], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, ModeSelectBubblePositions[0], 50);
+}
+
+rule: "Create grid positions array"
+if (Mode == 0)
+if (IsInPregame != true)
+{
+    GridDone = false;
+    GridPositions = [];
+    for (GridLoopY = 0; 5; 1)
+    {
+        for (GridLoopZ = -3; 3; 1)
+        {
+            GridPositions = Append(GridPositions, GridStart + Vector(0, GridLoopY * 1.1, GridLoopZ * 1.1));
+        }
+    }
+    GridDone = true;
+}
+
+rule: "Create x number of balls"
+if (GridDone == true)
+if (IsInPregame != true)
+if (Mode == 0)
+{
+    BallPositions = [];
+    for (RandomLoop = 0; GridNumberOfBalls; 1)
+    {
+        BallPositions = Append(BallPositions, RandomValueInArray(RemoveFromArray(GridPositions, BallPositions)));
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    TeleportBots();
+}
+
+rule: "Create new grid ball if ball is removed"
+if (CountOf(BallPositions) < GridNumberOfBalls)
+if (GridDone == true)
+if (IsInPregame != true)
+if (Mode == 0)
+{
+    BallPositions = Append(BallPositions, RandomValueInArray(RemoveFromArray(GridPositions, BallPositions)));
+    TeleportBots();
+    LoopIfConditionIsTrue();
+}
+
+disabled rule: "----------------------------------------- Standard mode = 1"
+{
+}
+
+disabled rule: "Create standard mode select bubble"
+{
+    # Create array for positions of color select effects
+    ModeSelectBubblePositions[1] = Vector(-20, 8, 5);
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Standard", ModeSelectBubblePositions[1] + Vector(0, -1.25, -2.2), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Mode == 1 ? Color.Green : Color.White, Spectators.DefaultVisibility);
+    # Create effects
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Mode == 1 ? Color.Green : Color.White, ModeSelectBubblePositions[1], 0.75, EffectRev.VisibleToAndColor);
+}
+
+disabled rule: "Select standard mode"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ModeSelectBubblePositions[1]) < 0.75)
+{
+    Mode = 1;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, ModeSelectBubblePositions[1], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, ModeSelectBubblePositions[1], 50);
+}
+
+void SetRandomPosition() "Subroutine - Set random position"
+{
+    BallPositions = Append(BallPositions, GridStart + Vector(RandomReal(-6, 2), RandomReal(0, 4), RandomReal(-6, 6)));
+    TeleportBots();
+}
+
+rule: "Create ball at random position"
+if (Mode == 1)
+if (IsInPregame != true)
+{
+    BallPositions = [];
+    SetRandomPosition();
+}
+
+rule: "Create new grid ball if ball is removed"
+if (Mode == 1)
+if (IsInPregame != true)
+if (CountOf(BallPositions) == 0)
+{
+    SetRandomPosition();
+}
+
+disabled rule: "----------------------------------------- 360 mode = 2"
+{
+}
+
+disabled rule: "Create 360 mode select bubble"
+{
+    # Create array for positions of color select effects
+    ModeSelectBubblePositions[2] = Vector(-20, 6, 5);
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "360", ModeSelectBubblePositions[2] + Vector(0, -1.25, -1.5), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Mode == 2 ? Color.Green : Color.White, Spectators.DefaultVisibility);
+    # Create effects
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Mode == 2 ? Color.Green : Color.White, ModeSelectBubblePositions[2], 0.75, EffectRev.VisibleToAndColor);
+}
+
+disabled rule: "Select 360 mode"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ModeSelectBubblePositions[2]) < 0.75)
+{
+    Mode = 2;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, ModeSelectBubblePositions[2], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, ModeSelectBubblePositions[2], 50);
+}
+
+void SetRandom360Position() "Subroutine - Set random 360 position"
+{
+    BallPositions = Append(BallPositions, Vector(0, 0, 0) + Vector(RandomReal(5, 15), RandomReal(1, 6), RandomReal(5, 15)));
+    BallPositions[0] = Vector(XOf(BallPositions[0]) * RandomValueInArray(PositiveOrNegative), YOf(BallPositions[0]), ZOf(BallPositions[0]) * RandomValueInArray(PositiveOrNegative));
+    TeleportBots();
+    Wait(0.15, WaitBehavior.IgnoreCondition);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.DebuffImpactSound, Color.White, BallPositions[0], 100);
+}
+
+rule: "Create ball at random position"
+if (Mode == 2)
+if (IsInPregame != true)
+{
+    BallPositions = [];
+    SetRandom360Position();
+}
+
+rule: "Create new grid ball if ball is removed"
+if (Mode == 2)
+if (IsInPregame != true)
+if (CountOf(BallPositions) == 0)
+{
+    SetRandom360Position();
+}
+
+rule: "Create noise"
+if (Mode == 2)
+if (IsInPregame != true)
+{
+    CreateEffect(AllPlayers(Team.All), Effect.BeaconSound, Color.White, BallPositions[0], 150, EffectRev.VisibleToPositionAndRadius);
+    NoiseEffect = LastCreatedEntity();
+}
+
+rule: "Remove noise"
+if (IsInPregame == true)
+{
+    DestroyEffect(NoiseEffect);
+}
+
+disabled rule: "----------------------------------------- Strafing targets mode = 3"
+{
+}
+
+disabled rule: "Create strafing mode select bubble"
+{
+    # Create array for positions of color select effects
+    ModeSelectBubblePositions[3] = Vector(-20, 4, 5);
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Strafing", ModeSelectBubblePositions[3] + Vector(0, -1.25, -2.15), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Mode == 3 ? Color.Green : Color.White, Spectators.DefaultVisibility);
+    # Create effects
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Mode == 3 ? Color.Green : Color.White, ModeSelectBubblePositions[3], 0.75, EffectRev.VisibleToAndColor);
+}
+
+disabled rule: "Select strafing mode"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ModeSelectBubblePositions[3]) < 0.75)
+{
+    Mode = 3;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, ModeSelectBubblePositions[3], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, ModeSelectBubblePositions[3], 50);
+}
+
+rule: "Create ball at random position"
+if (Mode == 3)
+if (IsInPregame != true)
+{
+    BallPositions = [];
+    SetRandomPosition();
+    TeleportBots();
+}
+
+rule: "Create new grid ball if ball is removed"
+if (Mode == 3)
+if (IsInPregame != true)
+if (CountOf(BallPositions) == 0)
+{
+    SetRandomPosition();
+}
+
+rule: "Set stuff to move ball"
+if (Mode == 3)
+if (IsInPregame != true)
+{
+    MovingTime = RandomInteger(0.5, 1.5);
+    MovingDirection = RandomValueInArray(PositiveOrNegative);
+    Wait(MovingTime, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "Move ball"
+if (Mode == 3)
+if (IsInPregame != true)
+{
+    BallPositions[0] = BallPositions[0] + Vector(0, 0, 0.1 * MovingDirection);
+    TeleportBots();
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "Is ball out of bounds on the negative side"
+if (Mode == 3)
+if (IsInPregame != true)
+if (ZOf(BallPositions[0]) < -12)
+{
+    MovingDirection = 1;
+}
+
+rule: "Is ball out of bounds on the positive side"
+if (Mode == 3)
+if (IsInPregame != true)
+if (ZOf(BallPositions[0]) > 12)
+{
+    MovingDirection = -1;
+}
+
+disabled rule: "--- Color select"
+{
+}
+
+rule: "Create color select bubbles and locations"
+{
+    BubbleColor = Color.Aqua;
+    Wait(1, WaitBehavior.IgnoreCondition);
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Target color", FirstOf(ColorSelectBubblePositions) + Vector(0, 0, 0), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, BubbleColor, Spectators.DefaultVisibility);
+    # Create array for positions of color select effects
+    ColorSelectBubblePositions = [Vector(5, 10, -20), Vector(5, 8.5, -20), Vector(5, 7, -20), Vector(5, 5.5, -20), Vector(5, 4, -20)];
+    # Create effects
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Color.Aqua, ColorSelectBubblePositions[0], 0.5, EffectRev.VisibleTo);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Color.White, ColorSelectBubblePositions[1], 0.5, EffectRev.VisibleTo);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Color.Red, ColorSelectBubblePositions[2], 0.5, EffectRev.VisibleTo);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Color.LimeGreen, ColorSelectBubblePositions[3], 0.5, EffectRev.VisibleTo);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, Color.Violet, ColorSelectBubblePositions[4], 0.5, EffectRev.VisibleTo);
+}
+
+rule: "Select aqua"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ColorSelectBubblePositions[0]) < 0.5)
+{
+    BubbleColor = Color.Aqua;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Aqua, ColorSelectBubblePositions[0], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Aqua, ColorSelectBubblePositions[0], 50);
+}
+
+rule: "Select white"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ColorSelectBubblePositions[1]) < 0.5)
+{
+    BubbleColor = Color.White;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.White, ColorSelectBubblePositions[1], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.White, ColorSelectBubblePositions[1], 50);
+}
+
+rule: "Select red"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ColorSelectBubblePositions[2]) < 0.5)
+{
+    BubbleColor = Color.Red;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Red, ColorSelectBubblePositions[2], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Red, ColorSelectBubblePositions[2], 50);
+}
+
+rule: "Select lime green"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ColorSelectBubblePositions[3]) < 0.5)
+{
+    BubbleColor = Color.LimeGreen;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.LimeGreen, ColorSelectBubblePositions[3], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.LimeGreen, ColorSelectBubblePositions[3], 50);
+}
+
+rule: "Select lime violet"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ColorSelectBubblePositions[4]) < 0.5)
+{
+    BubbleColor = Color.Violet;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Violet, ColorSelectBubblePositions[4], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Violet, ColorSelectBubblePositions[4], 50);
+}
+
+disabled rule: "--- Size select"
+{
+}
+
+disabled rule: "Create color select bubbles and locations"
+{
+    BubbleColor = Color.Aqua;
+    Wait(1, WaitBehavior.IgnoreCondition);
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Target size", FirstOf(SizeBubblePositions) + Vector(0, 0, 0), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.Gray, Spectators.DefaultVisibility);
+    # Create array for positions of color select effects
+    SizeBubblePositions = [Vector(-5, 10, -20), Vector(-5, 8.5, -20), Vector(-5, 7, -20), Vector(-5, 5.5, -20)];
+    # Create effects
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, BallRadius == 0.5 ? Color.Green : Color.White, SizeBubblePositions[0], 0.5, EffectRev.VisibleToAndColor);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, BallRadius == 0.4 ? Color.Green : Color.White, SizeBubblePositions[1], 0.4, EffectRev.VisibleToAndColor);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, BallRadius == 0.3 ? Color.Green : Color.White, SizeBubblePositions[2], 0.3, EffectRev.VisibleToAndColor);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, BallRadius == 0.2 ? Color.Green : Color.White, SizeBubblePositions[3], 0.2, EffectRev.VisibleToAndColor);
+}
+
+disabled rule: "Select 0.500 size"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, SizeBubblePositions[0]) < 0.5)
+{
+    BallRadius = 0.5;
+    SelectedBallRadius = 0.5;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, SizeBubblePositions[0], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, SizeBubblePositions[0], 50);
+}
+
+disabled rule: "Select 0.400 size"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, SizeBubblePositions[1]) < 0.4)
+{
+    BallRadius = 0.4;
+    SelectedBallRadius = 0.4;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, SizeBubblePositions[1], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, SizeBubblePositions[1], 50);
+}
+
+disabled rule: "Select 0.300 size"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, SizeBubblePositions[2]) < 0.3)
+{
+    BallRadius = 0.3;
+    SelectedBallRadius = 0.3;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, SizeBubblePositions[2], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, SizeBubblePositions[2], 50);
+}
+
+disabled rule: "Select 0.200 size"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, SizeBubblePositions[3]) < 0.2)
+{
+    BallRadius = 0.2;
+    SelectedBallRadius = 0.2;
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Green, SizeBubblePositions[3], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.Green, SizeBubblePositions[3], 50);
+}
+
+disabled rule: "--- Modifiers select"
+{
+}
+
+disabled rule: "Create modifier select bubbles and locations"
+{
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    # Create array for positions of color select effects
+    ModifierSelectBubblePositions = [Vector(-20, 10, -5), Vector(-20, 8, -5), Vector(-20, 6, -5), Vector(-20, 4, 5), Vector(-20, 2, -5)];
+    # Healthy targets
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Healthy targets", ModifierSelectBubblePositions[0] + Vector(0, -1.25, -3), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, HealthyTargets == 1 ? Color.Green : Color.White, Spectators.DefaultVisibility);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, HealthyTargets ? Color.Green : Color.White, ModifierSelectBubblePositions[0], 0.75, EffectRev.VisibleToAndColor);
+    # Random sizes
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), IsInPregame), "Random sizes", ModifierSelectBubblePositions[1] + Vector(0, -1.25, -3), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, RandomBalls == 1 ? Color.Green : Color.White, Spectators.DefaultVisibility);
+    CreateEffect(FilteredArray(AllPlayers(Team.All), IsInPregame), Effect.Sphere, RandomBalls ? Color.Green : Color.White, ModifierSelectBubblePositions[1], 0.75, EffectRev.VisibleToAndColor);
+}
+
+disabled rule: "Toggle healthy targets"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ModifierSelectBubblePositions[0]) < 0.75)
+{
+    HealthyTargets = !HealthyTargets;
+    ResetTargetHealth();
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, HealthyTargets ? Color.Green : Color.White, ModifierSelectBubblePositions[0], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, HealthyTargets ? Color.Green : Color.White, ModifierSelectBubblePositions[0], 50);
+}
+
+rule: "Healthy targets health bar"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+{
+    CreateProgressBarInWorldText(FilteredArray(AllPlayers(Team.All), HealthyTargets), 100 / 4 * CurrentBubbleHealth, null, UpdateEveryFrame(PositionOf(EventPlayer()) + Vector(0, BallRadius * 1.1, 0)), 0.05, Clipping.ClipAgainstSurfaces, Color.Red, Color.White, ProgressBarWorldEvaluation.VisibleToPositionValuesAndColor, Spectators.DefaultVisibility);
+}
+
+void ResetTargetHealth() "Subroutine - Reset healthy target health"
+{
+    (<Player[]>FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()))).CurrentBubbleHealth = 4;
+}
+
+disabled rule: "Toggle random sized targets"
+Event.OngoingPlayer
+if (RaycastBubbleSelect != false)
+if (DistanceBetween(RaycastBubbleSelect, ModifierSelectBubblePositions[1]) < 0.75)
+{
+    RandomBalls = !RandomBalls;
+    SetBallSize();
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, RandomBalls ? Color.Green : Color.White, ModifierSelectBubblePositions[1], 1);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, RandomBalls ? Color.Green : Color.White, ModifierSelectBubblePositions[1], 50);
+}
+
+void SetBallSize() "Subroutine - Set random ball size"
+{
+    if (RandomBalls)
+    {
+        BallRadius = RandomReal(0.15, 0.55);
+    }
+    else
+    {
+        BallRadius = SelectedBallRadius;
+    }
+}
+
+disabled rule: "--- Special cases"
+{
+}
+
+rule: "Cancel Mccree right click"
+Event.OngoingPlayer
+Player.Mccree
+if (IsFiringSecondary(EventPlayer()) == true)
+{
+    Wait(0.78, WaitBehavior.AbortWhenFalse);
+    CancelPrimaryAction(EventPlayer());
+}

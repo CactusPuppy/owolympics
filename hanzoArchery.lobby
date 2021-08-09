@@ -1,0 +1,31 @@
+{
+  "Lobby": {
+    "Allow Players Who Are In Queue": true,
+    "Max Spectators": 0,
+    "Max Team 1 Players": 1,
+    "Max Team 2 Players": 0
+  },
+  "Modes": {
+    "All": {
+      "Limit Roles": "2 Of Each Role Per Team"
+    },
+    "Skirmish": {
+      "Enabled Maps": [
+        "Workshop Chamber"
+      ]
+    }
+  },
+  "Heroes": {
+    "General": {
+      "General": {
+        "No Ammunition Requirement": true,
+        "Ultimate Ability": false
+      },
+      "Wrecking Ball": {
+        "Roll Always Active": true
+      },
+      "Enabled Heroes": ["Hanzo"]
+    }
+  },
+  "Description": "Aim Training Labs. Practice and improve your aim with various different modes. Works for all heroes.                             Made by Mitsiee at https://workshop.codes/aimlabs"
+}
