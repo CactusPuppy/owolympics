@@ -1,0 +1,49 @@
+{
+  "Lobby": {
+    "Allow Players Who Are In Queue": true,
+    "Map Rotation": "After A Game",
+    "Match Voice Chat": true,
+    "Max Spectators": 12,
+    "Return To Lobby": "Never"
+  },
+  "Modes": {
+    "All": {
+      "Allow Hero Switching": false,
+      "Game Mode Start": "Immediately",
+      "Hero Limit": "Off",
+      "Respawn As Random Hero": true
+    },
+    "Deathmatch": {
+      "Enabled Maps": [
+        "Eichenwalde"
+      ],
+      "Self Initiated Respawn": false
+    }
+  },
+  "Heroes": {
+    "General": {
+      "Enabled Heroes": [
+        "Torbjörn"
+      ],
+      "General": {
+        "Damage Dealt": 10.0,
+        "Damage Received": 10.0,
+        "Healing Received": 500.0,
+        "Health": 500.0,
+        "Movement Gravity": 300.0
+      },
+      "Torbjörn": {
+        "Deploy Turret": false,
+        "Movement Gravity": 300.0,
+        "No Ammunition Requirement": true,
+        "Overload": false,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Secondary Fire": false,
+        "Ultimate Ability (Molten Core)": false,
+        "Weapons Enabled": "Forge Hammer Only"
+      }
+    }
+  },
+  "Description": "Torbjörn Golf                                                                                                                  Created by Phasmite                                                                 bit.ly/thermitelabs (YouTube Channel)                                bit.ly/thermitediscord (Discord)"
+}

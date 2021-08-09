@@ -1,0 +1,432 @@
+import "torbGolf.lobby";
+
+globalvar Boolean playingGame;
+globalvar Vector[] holeStarts;
+globalvar Vector[] holeEnds;
+globalvar Vector[] holeCameraPos;
+globalvar Vector[] holeCameraTargets;
+globalvar Number currHoleIndex = -1;
+globalvar Number timePerHole = WorkshopSettingInteger("Settings", "Time Per Hole", 90, 10, 300);
+globalvar Boolean currentlyPlayingHole;
+globalvar Number maxStrokes = WorkshopSettingInteger("Settings", "Max Strokes (per hole)", 15, 0, 30);
+globalvar Number penaltyScore = WorkshopSettingInteger("Settings", "Score Penalty for Stroking Out/DNF (added to Max Strokes)", 2, 0, 10);
+
+playervar Boolean seeInstructions;
+playervar Number strokeStrength;
+playervar Number totalScore;
+playervar Number holeScore;
+playervar Boolean okToShoot;
+playervar Number strengthIndicator;
+playervar Boolean finishedThisHole;
+playervar Vector lastSafeLocation;
+
+Vector flagOffset: 2 * Up();
+Vector currHolePos: holeEnds[currHoleIndex];
+Vector currHoleStart: holeStarts[currHoleIndex];
+Number maxScorePerHole: maxStrokes + penaltyScore;
+Number numHoles: CountOf(holeEnds);
+
+rule: "Global init"
+{
+    DisableCompletion();
+    DisableScoring();
+    DisableMusic();
+    # Instructions
+    CreateHudText(LocalPlayer().seeInstructions ? LocalPlayer() : null, null, null, <"Hold [<0>] to charge your stroke, release to take a shot.", InputBindingString(Button.PrimaryFire)>, Location.Right, -4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(LocalPlayer().seeInstructions ? LocalPlayer() : null, null, null, "Get to the green sphere (under the flag) in as few strokes as possible.", Location.Right, -3, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(LocalPlayer().seeInstructions ? LocalPlayer() : null, null, null, <"Hold [<0>] to see the position of the hole.", InputBindingString(Button.Crouch)>, Location.Right, -2, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(LocalPlayer(), null, null, <"[<0>] - <1> Instructions.", InputBindingString(Button.Interact), LocalPlayer().seeInstructions ? "Close" : "Open">, Location.Right, -1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    # Shot HUD
+    CreateProgressBarHudText(
+        VisibleTo:          playingGame ? LocalPlayer() : null,
+        Value:              LocalPlayer().strokeStrength,
+        Text:               "Stroke Strength",
+        Location:           Location.Top,
+        SortOrder:          1,
+        ProgressBarColor:   Color.Purple,
+        TextColor:          Color.White,
+        Reevaluation:       ProgressBarHudEvaluation.VisibleToAndValues,
+        NonteamSpectators:  Spectators.VisibleNever
+    );
+    CreateHudText(
+        VisibleTo:          LocalPlayer().okToShoot ? LocalPlayer() : null,
+        Text:             <"Shot Ready! [<0>]", InputBindingString(Button.PrimaryFire)>,
+        Location:           Location.Top,
+        SortOrder:          3,
+        TextColor:        Color.Green,
+        Reevaluation:       HudTextRev.VisibleToAndString,
+        Spectators:         Spectators.VisibleNever
+    );
+    # Score HUD
+    CreateHudText(
+        VisibleTo:          playingGame ? LocalPlayer() : null,
+        Header:             LocalPlayer().holeScore,
+        Subheader:          "Strokes",
+        Location:           Location.Left,
+        SortOrder:          0,
+        HeaderColor:        Color.LimeGreen,
+        SubheaderColor:     Color.Yellow,
+        Reevaluation:       HudTextRev.VisibleToAndString,
+        Spectators:         Spectators.VisibleNever
+    );
+    # Credit HUD
+    CreateHudText(AllPlayers(Team.All), null, null, "Created by Thermite Labs (YouTube: bit.ly/thermitelabs)", Location.Right, -101, Color.Aqua, Color.White, Color.Aqua, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(AllPlayers(Team.All), null, null, "Discord: bit.ly/thermitediscord", Location.Right, -100, Color.Aqua, Color.White, Color.Aqua, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    # Hole in-world indicators
+    CreateEffect(currHoleIndex >= 0 ? AllPlayers() : null, Effect.Sphere, Color.Green, currHolePos, 2, EffectRev.VisibleToPositionAndRadius);
+    CreateIcon(currHoleIndex >= 0 ? AllPlayers() : null, currHolePos + flagOffset, Icon.Flag, IconRev.VisibleToAndPosition, Color.Red, true);
+    # Course HUD
+    CreateHudText(
+        VisibleTo:          playingGame ? AllPlayers() : null,
+        Header:             <@"<0> / <1>", currHoleIndex + 1, numHoles>,
+        Subheader:          "Hole",
+        Location:           Location.Left,
+        SortOrder:          -1,
+        HeaderColor:        Color.LimeGreen,
+        SubheaderColor:     Color.Yellow,
+        Reevaluation:       HudTextRev.VisibleToAndString,
+        Spectators:         Spectators.DefaultVisibility
+    );
+}
+
+rule: "Eichenwalde map data"
+if (CurrentMap())
+{
+    holeStarts = [
+        Vector(-26.7, 1, -0.43),
+        Vector(-11.21, 3.05, -35.18),
+        Vector(15.9, 3.67, -10.12),
+        Vector(2.92, 3.06, -35.67),
+        Vector(23.11, 6.03, -72.94),
+        Vector(28.8, 8, -86.56),
+        Vector(42.86, 5.24, -49.72),
+        Vector(51.77, 6.72, -106.61),
+        Vector(99.74, 12.72, -108.74),
+        Vector(99.92, 12.73, -66.68),
+        Vector(97.23, 15.72, -20.75),
+        Vector(130.38, 11.72, -57.57),
+        Vector(128.63, 13.72, -7.13),
+        Vector(112.76, 14.72, -31.38),
+        Vector(133.68, 10.25, -46.45),
+        Vector(89.06, 20.8, -63.35),
+        Vector(55.7, 17.72, -110.86),
+        Vector(78.21, 71.67, -57.31)
+    ];
+    holeEnds = [
+        Vector(-27.46, 2.7, -39.74),
+        Vector(4.98, 5, -14.63),
+        Vector(-3.98, 9.75, -35.38),
+        Vector(13.09, 6, -57.73),
+        Vector(4.88, 4.92, -91.66),
+        Vector(38.3, 5.25, -47.7),
+        Vector(54.08, 6.72, -106.91),
+        Vector(89.53, 12.72, -102.54),
+        Vector(98.14, 12.67, -72.19),
+        Vector(82.78, 15.72, -32.26),
+        Vector(125.17, 10.72, -60.85),
+        Vector(126.25, 10.72, -15.85),
+        Vector(118.71, 18.86, -45.03),
+        Vector(143.59, 18.1, -35.71),
+        Vector(89.54, 20.8, -60.5),
+        Vector(36.85, 12.72, -105.58),
+        Vector(75, 8, -85.67),
+        Vector(137.09, 60.65, -55.84)
+    ];
+    holeCameraPos = [
+        Vector(-21.62, 7.49, -34.82),
+        Vector(0.23, 8.66, -9.25),
+        Vector(-3.36, 30.97, -34.42),
+        Vector(17.96, 7.63, -63.17),
+        Vector(3.1, 9.15, -95.44),
+        Vector(32.99, 7.61, -58.23),
+        Vector(63.33, 9.83, -105.96),
+        Vector(84.22, 18.02, -99.97),
+        Vector(103.93, 16.43, -72.53),
+        Vector(87.08, 19.85, -37.42),
+        Vector(124.4, 14.56, -67.7),
+        Vector(121.68, 14, -13.52),
+        Vector(117.48, 22.85, -49.74),
+        Vector(141.83, 19.9, -41.82),
+        Vector(93.52, 23.07, -47.09),
+        Vector(43.21, 16.06, -100.29),
+        Vector(73.14, 45.66, -84.11),
+        Vector(143.2, 66.83, -50.19)
+    ];
+    holeCameraTargets = [
+        Vector(-24.93, 4.41, -36.95),
+        Vector(3.22, 6.5, -12.63),
+        Vector(-3.36, 25.97, -34.33),
+        Vector(14.71, 7.5, -59.37),
+        Vector(4.88, 6.42, -91.66),
+        Vector(36.31, 6.75, -54.59),
+        Vector(58.62, 8.22, -106.45),
+        Vector(87.96, 15.28, -101.83),
+        Vector(99.5, 14.17, -73.07),
+        Vector(84.52, 18.33, -33.4),
+        Vector(123.55, 12.22, -63.36),
+        Vector(125.87, 12.22, -15.59),
+        Vector(118.61, 20.36, -45.56),
+        Vector(143.08, 19.6, -36.99),
+        Vector(92.17, 22.46, -51.87),
+        Vector(39.38, 14.35, -103),
+        Vector(73.14, 40.66, -84.2),
+        Vector(139.59, 64.44, -52.49)
+    ];
+}
+
+rule: "When game is in progress"
+if (IsGameInProgress())
+{
+    if (
+        CountOf(holeStarts) > 0
+        && CountOf(holeStarts) == CountOf(holeEnds)
+        && CountOf(holeEnds) == CountOf(holeCameraPos)
+        && CountOf(holeCameraPos) == CountOf(holeCameraTargets)
+    ) {
+        SetSlowMotion(75);
+        PauseMatchTime();
+        playingGame = true;
+    } else {
+        SmallMessage(AllPlayers(), "Invalid Map Selected. Returning to Lobby...");
+        BigMessage(AllPlayers(), "Invalid Map");
+        Wait(3);
+        ReturnToLobby();
+    }
+}
+
+rule: 'Toggle instructions'
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact))
+{
+    seeInstructions = !seeInstructions;
+}
+
+rule: 'Toggle preview hole'
+Event.OngoingPlayer
+if (currentlyPlayingHole)
+if (IsButtonHeld(Button: Button.Crouch))
+{
+    StartCamera(EventPlayer(), holeCameraPos[currHoleIndex], holeCameraTargets[currHoleIndex], 40);
+    WaitUntil(!IsButtonHeld(Button: Button.Crouch), 1000000);
+    StopCamera();
+}
+
+rule: "Player init"
+Event.OngoingPlayer
+{
+    DisableRespawning();
+    EnableSpectate();
+    DisallowButton(Button: Button.Jump);
+    seeInstructions = true;
+    SetMoveSpeed(EventPlayer(), 0);
+    ForceThrottle(EventPlayer(), 0, 0, 0, 0, 0, 0);
+    if (playingGame) {
+        # TODO: Maybe have a data restore?
+        totalScore = 9999;
+        SetPlayerScore(EventPlayer(), totalScore * -1);
+    }
+}
+
+rule: "Increment/Decrement power"
+Event.OngoingPlayer
+if (IsButtonHeld(Button: Button.PrimaryFire))
+if (IsAlive())
+if (currentlyPlayingHole)
+if (okToShoot)
+{
+    strokeStrength = 0;
+    ChaseVariableAtRate(strokeStrength, 100, 67, RateChaseReevaluation.None);
+    WaitUntil(
+        ContinueCondition:      strokeStrength == 100 
+                                || !IsAlive()
+                                || !IsButtonHeld(Button: Button.PrimaryFire
+                                ),
+        Timeout:                1000000
+    );
+    if (IsAlive() && !IsButtonHeld(Button: Button.PrimaryFire)) {
+        TakeShot();
+        return;
+    }
+    ChaseVariableAtRate(strokeStrength, 0, 67, RateChaseReevaluation.None);
+    WaitUntil(
+        ContinueCondition:      strokeStrength == 0 
+                                || !IsAlive()
+                                || !IsButtonHeld(Button: Button.PrimaryFire
+                                ),
+        Timeout:                1000000
+    );
+    if (IsAlive() && !IsButtonHeld(Button: Button.PrimaryFire)) {
+        TakeShot();
+        return;
+    }
+    LoopIfConditionIsTrue();
+}
+
+void TakeShot() "[SUB] Fire shot" {
+    AbortIf(IsDead() || IsButtonHeld(Button: Button.PrimaryFire));
+    StopChasingVariable(strokeStrength);
+    ApplyImpulse(EventPlayer(), FacingDirectionOf(EventPlayer()), strokeStrength * 0.75, Relative.ToWorld, ContraryMotion.Cancel);
+    okToShoot = false;
+    holeScore += 1;
+}
+
+rule: "Stroke strength indicator"
+Event.OngoingPlayer
+if (okToShoot)
+if (strokeStrength > 0)
+{
+    CreateBeamEffect(
+        VisibleTo:          EventPlayer(),
+        BeamType:           BeamType.GrappleBeam,
+        StartPosition:      EyePosition(EventPlayer()) + 0.1 * FacingDirectionOf  (EventPlayer()) + 0.145 * Down(),
+        EndPosition:        EyePosition(EventPlayer()) + FacingDirectionOf(EventPlayer()) * 0.017 * strokeStrength,
+        Color:              null,
+        Reevaluation:       EffectRev.VisibleToPositionAndRadius
+    );
+    strengthIndicator = LastCreatedEntity();
+    WaitUntil(!okToShoot, 1000000);
+    DestroyEffect(strengthIndicator);
+}
+
+rule: "Add more sliding on ground"
+Event.OngoingPlayer
+if (currentlyPlayingHole)
+if (!okToShoot)
+if (IsOnGround())
+if (SpeedOf() > 0.1)
+{
+    ApplyImpulse(EventPlayer(), VelocityOf(), SpeedOf() * 0.1, Relative.ToWorld, ContraryMotion.Incorporate);
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "Mark player as able to shoot again when stopped"
+Event.OngoingPlayer
+if (HasSpawned())
+if (IsAlive())
+if (!okToShoot)
+if (currentlyPlayingHole)
+if (SpeedOf() < 0.1)
+{
+    Wait(0.1, WaitBehavior.AbortWhenFalse);
+    # Stroke-out check
+    if (holeScore == maxStrokes) {
+        holeScore = maxScorePerHole;
+        finishedThisHole = true;
+        return;
+    }
+    lastSafeLocation = PositionOf();
+    okToShoot = true;
+    strokeStrength = 0;
+}
+
+rule: "After player takes a stroke out of the gate, make them visible again"
+Event.OngoingPlayer
+if (currentlyPlayingHole)
+if (holeScore > 0)
+{
+    Wait(0.1, WaitBehavior.AbortWhenFalse);
+    SetInvisible(EventPlayer(), InvisibleTo.None);
+}
+
+rule: "Eich - Teleport if hole 18 fall"
+Event.OngoingPlayer
+if (currHoleIndex == 18)
+if (YOf(PositionOf(EventPlayer())) < 58)
+if (ArrayContains([Map.Eichenwalde, Map.Eichenwalde_Halloween], CurrentMap()))
+{
+    Kill(EventPlayer(), null);
+}
+
+rule: "If player dies without getting to hole, respawn them after a delay"
+Event.OnDeath
+if (currentlyPlayingHole)
+if (!finishedThisHole)
+{
+    Teleport(EventPlayer(), lastSafeLocation);
+    Wait(1.5, WaitBehavior.RestartWhenTrue);
+    if (IsDead()) {
+        Resurrect();
+        WaitUntil(IsAlive(), 1);
+        SetFacing(AllPlayers(), DirectionTowards(EyePosition(), currHolePos), Relative.ToWorld);
+    }
+}
+
+rule: "When player gets to the hole"
+Event.OngoingPlayer
+if (currentlyPlayingHole)
+if (HasSpawned())
+if (
+    (DistanceBetween(PositionOf(), currHolePos) <= 2 && DistanceBetween(PositionOf(), currHolePos) != 0)
+    || (DistanceBetween(EyePosition(), currHolePos) <= 2 && DistanceBetween(EyePosition(), currHolePos) != 0)
+)
+{
+    Kill(EventPlayer(), null);
+    finishedThisHole = true;
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, PositionOf(EventPlayer()), 100);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.White, PositionOf(EventPlayer()), 5);
+    StopChasingVariable(strokeStrength);
+    strokeStrength = 0;
+}
+
+rule: "If time runs out or everyone finishes while playing a hole, move on"
+if (currentlyPlayingHole)
+if (MatchTime() == 0 || IsTrueForAll(AllPlayers(), !HasSpawned(ArrayElement()) || ArrayElement().finishedThisHole))
+{
+    PauseMatchTime();
+    currentlyPlayingHole = false;
+}
+
+rule: "If not playing a hole, advance"
+if (playingGame)
+if (!currentlyPlayingHole)
+{
+    currHoleIndex += 1;
+    AbortIf(currHoleIndex >= numHoles);
+    Resurrect(AllDeadPlayers());
+    SetInvisible(AllPlayers(Team.All), InvisibleTo.All);
+    # Negate any momentum someone had going into next hole
+    StartForcingPlayerPosition(AllPlayers(), currHoleStart, false);
+    # Start the clock
+    SetMatchTime(timePerHole);
+    UnpauseMatchTime();
+    # Log new respawn point
+    AllPlayers().lastSafeLocation = currHoleStart;
+    # Announce which hole this is
+    BigMessage(AllPlayers(), <@"Round <0>!", currHoleIndex + 1>);
+    Wait(0.048);
+    StopForcingPlayerPosition(AllPlayers());
+    SetFacing(AllPlayers(), DirectionTowards(EyePosition(FirstOf(AllPlayers())), currHolePos), Relative.ToWorld);
+    currentlyPlayingHole = true;
+}
+
+rule: "In between rounds, update score and setup for next hole"
+Event.OngoingPlayer
+if (playingGame)
+if (!currentlyPlayingHole)
+# Don't check when entering first hole
+if (currHoleIndex > 0)
+{
+    if (!finishedThisHole) {
+        holeScore = maxScorePerHole;
+    }
+    totalScore += holeScore;
+    SetPlayerScore(EventPlayer(), -1 * totalScore);
+    holeScore = 0;
+    finishedThisHole = false;
+    WaitUntil(currentlyPlayingHole, 1);
+    SetFacing(AllPlayers(), DirectionTowards(EyePosition(), currHolePos), Relative.ToWorld);
+}
+
+rule: "Declare player victory after last hole"
+if (playingGame)
+if (!currentlyPlayingHole)
+if (currHoleIndex >= numHoles)
+{
+    DeclarePlayerVictory(LastOf(
+        SortedArray(
+            AllPlayers(),
+            ScoreOf(ArrayElement())
+        )
+    ));
+}

@@ -1,0 +1,648 @@
+import "torbGolf.lobby";
+
+playervar define instructions;
+globalvar define gameRunning;
+globalvar define holeStarts;
+globalvar define holeCameraPos;
+globalvar define holeEnds;
+globalvar define holeCameraTargets;
+playervar define strokeStrength;
+globalvar define holeIndex;
+playervar define totalScore;
+playervar define holeScore;
+playervar define okToShootText;
+playervar define incrDecrStrokeStrength;
+playervar define canShootMode;
+globalvar define timeRemainingInHole;
+globalvar define currentPlayers;
+globalvar define flagOffset;
+globalvar define easterEggTrigger;
+playervar define isCharging;
+globalvar define currHolePos;
+playervar define finishedHole;
+globalvar define goingToNextHole;
+playervar define kindaUselessNgl;
+globalvar define holeIndex2;
+globalvar define holeSphere;
+globalvar define holeFlagIcon;
+playervar define ppBeam;
+
+rule: "Torbjorn Golf Ultimate created by twitch.tv/Phasmite a.k.a. Phasmite#1250"
+{
+}
+
+rule: "If BW:"
+if ((CurrentMap() == Map.Blizzard_World_Winter || CurrentMap() == Map.Blizzard_World) == true)
+if (gameRunning == 0)
+{
+    holeStarts = [];
+    holeStarts = Append(holeStarts, Vector(3, -5, -90));
+    holeStarts = Append(holeStarts, Vector(3, -3.99, -19.5));
+    holeStarts = Append(holeStarts, Vector(-31, -2, 4));
+    holeStarts = Append(holeStarts, Vector(21.65, -4.62, 14.07));
+    holeStarts = Append(holeStarts, Vector(3, -0.09, 28));
+    holeStarts = Append(holeStarts, Vector(27.5, 2, 50.75));
+    holeStarts = Append(holeStarts, Vector(29.07, 6, 69.99));
+    holeStarts = Append(holeStarts, Vector(-16, 1.92, 89.01));
+    holeStarts = Append(holeStarts, Vector(-68.75, 5.62, 74.74));
+    holeStarts = Append(holeStarts, Vector(-19.75, 2.08, 100.15));
+    holeStarts = Append(holeStarts, Vector(-48.75, -0.21, 135));
+    holeStarts = Append(holeStarts, Vector(-82.5, 1.75, 147));
+    holeStarts = Append(holeStarts, Vector(-131.03, 2.02, 108));
+    holeStarts = Append(holeStarts, Vector(-118.5, -2.25, 129.7));
+    holeStarts = Append(holeStarts, Vector(-77, 0.6, 123.5));
+    holeStarts = Append(holeStarts, Vector(-86.5, 0.75, 82.5));
+    holeStarts = Append(holeStarts, Vector(-125, 15.68, 91.5));
+    holeStarts = Append(holeStarts, Vector(-80.03, 45.04, 63.17));
+    holeCameraPos = [];
+    holeEnds = [];
+    holeCameraTargets = [];
+    holeEnds = Append(holeEnds, Vector(3, -5.04, -49.5));
+    holeEnds = Append(holeEnds, Vector(-25, -3.96, 0));
+    holeEnds = Append(holeEnds, Vector(3, -5.1, 17));
+    holeEnds = Append(holeEnds, Vector(22, 0.04, 28));
+    holeEnds = Append(holeEnds, Vector(20.25, 1, 52.25));
+    holeEnds = Append(holeEnds, Vector(32.5, 2.23, 88));
+    holeEnds = Append(holeEnds, Vector(-13, 2, 60.5));
+    holeEnds = Append(holeEnds, Vector(-77.75, 4.88, 66));
+    holeEnds = Append(holeEnds, Vector(-30, 11.86, 88.25));
+    holeEnds = Append(holeEnds, Vector(-46, -0.21, 119.1));
+    holeEnds = Append(holeEnds, Vector(-72.25, 1.75, 157));
+    holeEnds = Append(holeEnds, Vector(-108.75, -1.23, 126));
+    holeEnds = Append(holeEnds, Vector(-110.5, -4.25, 114));
+    holeEnds = Append(holeEnds, Vector(-82.25, -0.12, 122));
+    holeEnds = Append(holeEnds, Vector(-36.84, -2.21, 146.28));
+    holeEnds = Append(holeEnds, Vector(-81.54, 6.6, 97.71));
+    holeEnds = Append(holeEnds, Vector(-50, 15.68, 35.5));
+    holeEnds = Append(holeEnds, Vector(-67.5, 35, 75.5));
+    holeCameraPos = Append(holeCameraPos, Vector(3.13, -2.12, -46.13));
+    holeCameraPos = Append(holeCameraPos, Vector(-28.64, -1.15, 0.2));
+    holeCameraPos = Append(holeCameraPos, Vector(2.96, -0.6, 20.68));
+    holeCameraPos = Append(holeCameraPos, Vector(21.08, 5.15, 26.08));
+    holeCameraPos = Append(holeCameraPos, Vector(24.22, 3.6, 50.12));
+    holeCameraPos = Append(holeCameraPos, Vector(33.6, 5.12, 92.96));
+    holeCameraPos = Append(holeCameraPos, Vector(-13.8, 4.42, 58.36));
+    holeCameraPos = Append(holeCameraPos, Vector(-80.57, 7.99, 62.85));
+    holeCameraPos = Append(holeCameraPos, Vector(-22.49, 18.13, 95.44));
+    holeCameraPos = Append(holeCameraPos, Vector(-45.21, 3.62, 127.17));
+    holeCameraPos = Append(holeCameraPos, Vector(-74.91, 5.06, 157.34));
+    holeCameraPos = Append(holeCameraPos, Vector(-109.99, 3.44, 129.93));
+    holeCameraPos = Append(holeCameraPos, Vector(-104.16, 0.55, 115.62));
+    holeCameraPos = Append(holeCameraPos, Vector(-86.91, 3.37, 120.86));
+    holeCameraPos = Append(holeCameraPos, Vector(-40.48, 2.07, 145.48));
+    holeCameraPos = Append(holeCameraPos, Vector(-83.53, 9.21, 97.45));
+    holeCameraPos = Append(holeCameraPos, Vector(-42.81, 18.97, 38.59));
+    holeCameraPos = Append(holeCameraPos, Vector(-74.85, 35.58, 68.66));
+    holeCameraTargets = Append(holeCameraTargets, Vector(3.04, -4.18, -50.69));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-23.82, -2.46, 0.21));
+    holeCameraTargets = Append(holeCameraTargets, Vector(2.98, -2.73, 16.17));
+    holeCameraTargets = Append(holeCameraTargets, Vector(21.97, 1.5, 29.38));
+    holeCameraTargets = Append(holeCameraTargets, Vector(19.72, 2.5, 52.02));
+    holeCameraTargets = Append(holeCameraTargets, Vector(31.89, 3.73, 88.47));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-10.34, 3.5, 61.86));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-77.06, 7.24, 66.23));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-25.51, 16.84, 91.67));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-46.43, 2.24, 122.52));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-70.27, 3.25, 156.97));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-108.85, 1.26, 125.58));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-108.85, -0.66, 114.37));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-82.23, 2.79, 122.27));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-36.84, 1.5, 146.28));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-78.85, 8.07, 98.78));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-47.25, 17.18, 37.16));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-71.37, 35.22, 72.24));
+}
+
+rule: "If Eich:"
+if (gameRunning == 0)
+if ((CurrentMap() == Map.Eichenwalde || CurrentMap() == Map.Eichenwalde_Halloween) == true)
+{
+    holeStarts = [];
+    holeCameraPos = [];
+    holeEnds = [];
+    holeCameraTargets = [];
+    holeStarts = Append(holeStarts, Vector(-26.7, 1, -0.43));
+    holeStarts = Append(holeStarts, Vector(-11.21, 3.05, -35.18));
+    holeStarts = Append(holeStarts, Vector(15.9, 3.67, -10.12));
+    holeStarts = Append(holeStarts, Vector(2.92, 3.06, -35.67));
+    holeStarts = Append(holeStarts, Vector(23.11, 6.03, -72.94));
+    holeStarts = Append(holeStarts, Vector(28.8, 8, -86.56));
+    holeStarts = Append(holeStarts, Vector(42.86, 5.24, -49.72));
+    holeStarts = Append(holeStarts, Vector(51.77, 6.72, -106.61));
+    holeStarts = Append(holeStarts, Vector(99.74, 12.72, -108.74));
+    holeStarts = Append(holeStarts, Vector(99.92, 12.73, -66.68));
+    holeStarts = Append(holeStarts, Vector(97.23, 15.72, -20.75));
+    holeStarts = Append(holeStarts, Vector(130.38, 11.72, -57.57));
+    holeStarts = Append(holeStarts, Vector(128.63, 13.72, -7.13));
+    holeStarts = Append(holeStarts, Vector(112.76, 14.72, -31.38));
+    holeStarts = Append(holeStarts, Vector(133.68, 10.25, -46.45));
+    holeStarts = Append(holeStarts, Vector(89.06, 20.8, -63.35));
+    holeStarts = Append(holeStarts, Vector(55.7, 17.72, -110.86));
+    holeStarts = Append(holeStarts, Vector(78.21, 71.67, -57.31));
+    holeEnds = Append(holeEnds, Vector(-27.46, 2.7, -39.74));
+    holeEnds = Append(holeEnds, Vector(4.98, 5, -14.63));
+    holeEnds = Append(holeEnds, Vector(-3.98, 9.75, -35.38));
+    holeEnds = Append(holeEnds, Vector(13.09, 6, -57.73));
+    holeEnds = Append(holeEnds, Vector(4.88, 4.92, -91.66));
+    holeEnds = Append(holeEnds, Vector(38.3, 5.25, -47.7));
+    holeEnds = Append(holeEnds, Vector(54.08, 6.72, -106.91));
+    holeEnds = Append(holeEnds, Vector(89.53, 12.72, -102.54));
+    holeEnds = Append(holeEnds, Vector(98.14, 12.67, -72.19));
+    holeEnds = Append(holeEnds, Vector(82.78, 15.72, -32.26));
+    holeEnds = Append(holeEnds, Vector(125.17, 10.72, -60.85));
+    holeEnds = Append(holeEnds, Vector(126.25, 10.72, -15.85));
+    holeEnds = Append(holeEnds, Vector(118.71, 18.86, -45.03));
+    holeEnds = Append(holeEnds, Vector(143.59, 18.1, -35.71));
+    holeEnds = Append(holeEnds, Vector(89.54, 20.8, -60.5));
+    holeEnds = Append(holeEnds, Vector(36.85, 12.72, -105.58));
+    holeEnds = Append(holeEnds, Vector(75, 8, -85.67));
+    holeEnds = Append(holeEnds, Vector(137.09, 60.65, -55.84));
+    holeCameraPos = Append(holeCameraPos, Vector(-21.62, 7.49, -34.82));
+    holeCameraPos = Append(holeCameraPos, Vector(0.23, 8.66, -9.25));
+    holeCameraPos = Append(holeCameraPos, Vector(-3.36, 30.97, -34.42));
+    holeCameraPos = Append(holeCameraPos, Vector(17.96, 7.63, -63.17));
+    holeCameraPos = Append(holeCameraPos, Vector(3.1, 9.15, -95.44));
+    holeCameraPos = Append(holeCameraPos, Vector(32.99, 7.61, -58.23));
+    holeCameraPos = Append(holeCameraPos, Vector(63.33, 9.83, -105.96));
+    holeCameraPos = Append(holeCameraPos, Vector(84.22, 18.02, -99.97));
+    holeCameraPos = Append(holeCameraPos, Vector(103.93, 16.43, -72.53));
+    holeCameraPos = Append(holeCameraPos, Vector(87.08, 19.85, -37.42));
+    holeCameraPos = Append(holeCameraPos, Vector(124.4, 14.56, -67.7));
+    holeCameraPos = Append(holeCameraPos, Vector(121.68, 14, -13.52));
+    holeCameraPos = Append(holeCameraPos, Vector(117.48, 22.85, -49.74));
+    holeCameraPos = Append(holeCameraPos, Vector(141.83, 19.9, -41.82));
+    holeCameraPos = Append(holeCameraPos, Vector(93.52, 23.07, -47.09));
+    holeCameraPos = Append(holeCameraPos, Vector(43.21, 16.06, -100.29));
+    holeCameraPos = Append(holeCameraPos, Vector(73.14, 45.66, -84.11));
+    holeCameraPos = Append(holeCameraPos, Vector(143.2, 66.83, -50.19));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-24.93, 4.41, -36.95));
+    holeCameraTargets = Append(holeCameraTargets, Vector(3.22, 6.5, -12.63));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-3.36, 25.97, -34.33));
+    holeCameraTargets = Append(holeCameraTargets, Vector(14.71, 7.5, -59.37));
+    holeCameraTargets = Append(holeCameraTargets, Vector(4.88, 6.42, -91.66));
+    holeCameraTargets = Append(holeCameraTargets, Vector(36.31, 6.75, -54.59));
+    holeCameraTargets = Append(holeCameraTargets, Vector(58.62, 8.22, -106.45));
+    holeCameraTargets = Append(holeCameraTargets, Vector(87.96, 15.28, -101.83));
+    holeCameraTargets = Append(holeCameraTargets, Vector(99.5, 14.17, -73.07));
+    holeCameraTargets = Append(holeCameraTargets, Vector(84.52, 18.33, -33.4));
+    holeCameraTargets = Append(holeCameraTargets, Vector(123.55, 12.22, -63.36));
+    holeCameraTargets = Append(holeCameraTargets, Vector(125.87, 12.22, -15.59));
+    holeCameraTargets = Append(holeCameraTargets, Vector(118.61, 20.36, -45.56));
+    holeCameraTargets = Append(holeCameraTargets, Vector(143.08, 19.6, -36.99));
+    holeCameraTargets = Append(holeCameraTargets, Vector(92.17, 22.46, -51.87));
+    holeCameraTargets = Append(holeCameraTargets, Vector(39.38, 14.35, -103));
+    holeCameraTargets = Append(holeCameraTargets, Vector(73.14, 40.66, -84.2));
+    holeCameraTargets = Append(holeCameraTargets, Vector(139.59, 64.44, -52.49));
+}
+
+rule: "If HW:"
+if (gameRunning == 0)
+if ((CurrentMap() == Map.Hollywood || CurrentMap() == Map.Hollywood_Halloween) == true)
+{
+    holeStarts = [];
+    holeCameraPos = [];
+    holeEnds = [];
+    holeCameraTargets = [];
+    holeStarts = Append(holeStarts, Vector(-11.83, 0.01, 61.72));
+    holeStarts = Append(holeStarts, Vector(18.5, 4.02, 29));
+    holeStarts = Append(holeStarts, Vector(8.32, 6, 46.92));
+    holeStarts = Append(holeStarts, Vector(-36.85, 5.75, 25.25));
+    holeStarts = Append(holeStarts, Vector(-19.17, 5.75, -9.74));
+    holeStarts = Append(holeStarts, Vector(2.3, 1.75, -2.43));
+    holeStarts = Append(holeStarts, Vector(8.65, 12.84, -38.82));
+    holeStarts = Append(holeStarts, Vector(-7.39, 1.73, -62.74));
+    holeStarts = Append(holeStarts, Vector(17.69, 1.75, -91.42));
+    holeStarts = Append(holeStarts, Vector(-11.35, 9.75, -108.54));
+    holeStarts = Append(holeStarts, Vector(-12.24, 9.75, -128.34));
+    holeStarts = Append(holeStarts, Vector(-50.25, 3.75, -134.41));
+    holeStarts = Append(holeStarts, Vector(-49.85, 3.75, -91.18));
+    holeStarts = Append(holeStarts, Vector(-33.68, 9.75, -116.93));
+    holeStarts = Append(holeStarts, Vector(-13.45, 1.73, -76.93));
+    holeStarts = Append(holeStarts, Vector(33.04, 1.6, -83.6));
+    holeStarts = Append(holeStarts, Vector(40.92, 11.53, 80.14));
+    holeStarts = Append(holeStarts, Vector(-56.5, 9.22, 55.54));
+    holeEnds = Append(holeEnds, Vector(18.5, 4.02, 29));
+    holeEnds = Append(holeEnds, Vector(8.32, 6, 46.92));
+    holeEnds = Append(holeEnds, Vector(-36.85, 5.75, 25.25));
+    holeEnds = Append(holeEnds, Vector(-19.17, 5.75, -9.75));
+    holeEnds = Append(holeEnds, Vector(0.1, 1.75, 0.75));
+    holeEnds = Append(holeEnds, Vector(8.5, 12.84, -38.75));
+    holeEnds = Append(holeEnds, Vector(-6.51, 1.73, -58.75));
+    holeEnds = Append(holeEnds, Vector(18.98, 1.75, -91.94));
+    holeEnds = Append(holeEnds, Vector(-14.07, 9.75, -114.54));
+    holeEnds = Append(holeEnds, Vector(-19.52, 9.75, -126.78));
+    holeEnds = Append(holeEnds, Vector(-53.09, 3.75, -145.31));
+    holeEnds = Append(holeEnds, Vector(-47.61, 3.75, -86.37));
+    holeEnds = Append(holeEnds, Vector(-34.15, 9.75, -116.37));
+    holeEnds = Append(holeEnds, Vector(-14.82, 1.75, -79.89));
+    holeEnds = Append(holeEnds, Vector(31.25, 1.86, -78.4));
+    holeEnds = Append(holeEnds, Vector(-8.32, 7.44, -43.93));
+    holeEnds = Append(holeEnds, Vector(37.71, 14.01, 15.25));
+    holeEnds = Append(holeEnds, Vector(-80.79, 5.26, 55.54));
+    holeCameraPos = Append(holeCameraPos, Vector(4.91, 4.63, 18.9));
+    holeCameraPos = Append(holeCameraPos, Vector(1.97, 10.19, 50.2));
+    holeCameraPos = Append(holeCameraPos, Vector(-32.35, 8.39, 27.08));
+    holeCameraPos = Append(holeCameraPos, Vector(-21.68, 8.07, -5.49));
+    holeCameraPos = Append(holeCameraPos, Vector(-6.56, 4.25, 4.53));
+    holeCameraPos = Append(holeCameraPos, Vector(8.81, 17.65, -42.52));
+    holeCameraPos = Append(holeCameraPos, Vector(-10.97, 5.22, -57.67));
+    holeCameraPos = Append(holeCameraPos, Vector(26.04, 5.48, -94.9));
+    holeCameraPos = Append(holeCameraPos, Vector(-6.63, 13.01, -112.62));
+    holeCameraPos = Append(holeCameraPos, Vector(-22.2, 13.79, -132.17));
+    holeCameraPos = Append(holeCameraPos, Vector(-19.89, 5.42, -151.9));
+    holeCameraPos = Append(holeCameraPos, Vector(-42.77, 5.34, -90.45));
+    holeCameraPos = Append(holeCameraPos, Vector(-31.8, 12.79, -107.44));
+    holeCameraPos = Append(holeCameraPos, Vector(-13.6, 5.2, -89.05));
+    holeCameraPos = Append(holeCameraPos, Vector(19.89, 5.02, -73.31));
+    holeCameraPos = Append(holeCameraPos, Vector(-2.79, 10.71, -39.44));
+    holeCameraPos = Append(holeCameraPos, Vector(42.45, 16.87, 15.92));
+    holeCameraPos = Append(holeCameraPos, Vector(-86.12, 7.16, 55.54));
+    holeCameraTargets = Append(holeCameraTargets, Vector(8.49, 4.15, 22.35));
+    holeCameraTargets = Append(holeCameraTargets, Vector(5.97, 8.18, 47.96));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-36.85, 7.25, 25.25));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-19.17, 7.25, -9.75));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-2.17, 3.25, 2.34));
+    holeCameraTargets = Append(holeCameraTargets, Vector(8.79, 14.34, -38.77));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-6.51, 3.23, -58.75));
+    holeCameraTargets = Append(holeCameraTargets, Vector(22.86, 3.13, -91.84));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-11.3, 11.26, -112.38));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-20.1, 12.23, -127.9));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-24.74, 5.25, -150.68));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-46.6, 5.25, -87.23));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-33.01, 12.09, -112.01));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-14.68, 3.43, -84.5));
+    holeCameraTargets = Append(holeCameraTargets, Vector(24.4, 4.26, -75.33));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-6.58, 9.2, -42.33));
+    holeCameraTargets = Append(holeCameraTargets, Vector(38.19, 15.31, 14.08));
+    holeCameraTargets = Append(holeCameraTargets, Vector(-81.13, 6.77, 55.54));
+}
+
+rule: "Player init"
+Event.OngoingPlayer
+if (gameRunning == 0)
+if (IsGameInProgress() == true)
+{
+    CreateHudText(EventPlayer(), strokeStrength, "Stroke Strength", null, Location.Top, 0, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), <@"<0> / <1>", holeIndex, 18>, "Hole", null, Location.Left, -1, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), totalScore, <@"<0> <1>", @"Total", @"Score">, null, Location.Left, -0.5, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), holeScore, <@"<0> <1>", "Hole", @"Score">, null, Location.Left, 0, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    SetMoveSpeed(EventPlayer(), AbsoluteValue(0));
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    DisableRespawning(EventPlayer());
+    EnableSpectate(EventPlayer());
+    CreateHudText(EventPlayer(), <@"Good">, null, null, Location.Right, 0, Color.Green, Color.Green, Color.Green, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    okToShootText = LastTextID();
+    incrDecrStrokeStrength = 1;
+    ForceThrottle(EventPlayer(), 0, 0, 0, 0, 0, 0);
+    canShootMode = 1;
+    CreateHudText(EventPlayer(), null, null, "Hold primary fire to charge your stroke, release to take a shot.", Location.Right, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[0] = LastTextID();
+    CreateHudText(EventPlayer(), null, null, "Get to the green sphere (under the flag) in as few strokes as possible.", Location.Right, 2, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[1] = LastTextID();
+    CreateHudText(EventPlayer(), null, null, "Hold crouch to see the position of the hole.", Location.Right, 3, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[2] = LastTextID();
+    CreateHudText(EventPlayer(), null, null, "Interact (F) to close instructions.", Location.Right, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[3] = LastTextID();
+}
+
+rule: "Global init"
+if (gameRunning == 0)
+if (IsGameInProgress() == true)
+{
+    DisableCompletion();
+    DisableScoring();
+    PauseMatchTime();
+    CreateHudText(AllPlayers(Team.All), timeRemainingInHole, <@"Time">, null, Location.Left, -2, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    timeRemainingInHole = 1;
+    ChaseVariableAtRate(timeRemainingInHole, 0, 1, RateChaseReevaluation.DestinationAndRate);
+    Wait(1, WaitBehavior.IgnoreCondition);
+    SetSlowMotion(75);
+    currentPlayers = [];
+    currentPlayers = AllPlayers(Team.All);
+    gameRunning = 1;
+    flagOffset = Vector(0, 2, 0);
+    easterEggTrigger = RandomInteger(1, 25);
+    MinWait();
+    AllPlayers(Team.All).totalScore = 0;
+    CreateHudText(AllPlayers(Team.All), null, null, "Created by Thermite Labs (YouTube: bit.ly/thermitelabs)", Location.Top, 1, Color.Aqua, Color.White, Color.Aqua, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(AllPlayers(Team.All), null, null, "Discord: bit.ly/thermitediscord", Location.Top, 2, Color.Aqua, Color.White, Color.Aqua, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "if left click, increment power"
+Event.OngoingPlayer
+if (gameRunning == 1)
+if (strokeStrength == 0)
+if (IsButtonHeld(EventPlayer(), Button.PrimaryFire) == true)
+if (IsAlive(EventPlayer()) == true)
+if (incrDecrStrokeStrength == 1)
+if (canShootMode == 1)
+{
+    isCharging = 1;
+    ChaseVariableAtRate(strokeStrength, 100, 50, RateChaseReevaluation.DestinationAndRate);
+    incrDecrStrokeStrength = 2;
+}
+
+rule: "if left click, decrement power"
+Event.OngoingPlayer
+if (gameRunning == 1)
+if (strokeStrength == 100)
+if (IsButtonHeld(EventPlayer(), Button.PrimaryFire) == true)
+if (IsAlive(EventPlayer()) == true)
+if (incrDecrStrokeStrength == 2)
+if (canShootMode == 1)
+{
+    isCharging = 1;
+    ChaseVariableAtRate(strokeStrength, 0, 50, RateChaseReevaluation.DestinationAndRate);
+    incrDecrStrokeStrength = 1;
+}
+
+rule: "Good"
+Event.OngoingPlayer
+if (canShootMode == 1 == true)
+if (gameRunning == 1)
+{
+    DestroyHudText(okToShootText);
+    CreateHudText(EventPlayer(), <@"Good">, null, null, Location.Right, 0, Color.Green, Color.Green, Color.Green, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    okToShootText = LastTextID();
+}
+
+rule: "bad"
+Event.OngoingPlayer
+if (canShootMode == 3 == true)
+if (gameRunning == 1)
+{
+    Wait(1.1, WaitBehavior.IgnoreCondition);
+    canShootMode = 1;
+    incrDecrStrokeStrength = 1;
+}
+
+rule: "If Lc happened and no longer holding lc, add score, push player with the wanted value"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.PrimaryFire) == false)
+if (isCharging == 1)
+if (gameRunning == 1)
+if (IsAlive(EventPlayer()) == true)
+{
+    AllowButton(EventPlayer(), Button.PrimaryFire);
+    ApplyImpulse(EventPlayer(), FacingDirectionOf(EventPlayer()), strokeStrength * 0.75, Relative.ToWorld, ContraryMotion.Cancel);
+    canShootMode = 3;
+    ChaseVariableAtRate(strokeStrength, strokeStrength, 0, RateChaseReevaluation.DestinationAndRate);
+    strokeStrength = 0;
+    DestroyHudText(okToShootText);
+    CreateHudText(EventPlayer(), <@"Stopped">, null, null, Location.Right, 0, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    okToShootText = LastTextID();
+    holeScore += 1;
+    totalScore += 1;
+    isCharging = 0;
+}
+
+rule: "Score"
+Event.OngoingPlayer
+if (DistanceBetween(PositionOf(EventPlayer()), currHolePos) <= AbsoluteValue(2))
+if (gameRunning == 1)
+if (DistanceBetween(PositionOf(EventPlayer()), currHolePos) != AbsoluteValue(0))
+if (IsAlive(EventPlayer()) == true)
+{
+    Kill(EventPlayer(), null);
+    finishedHole = 1;
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, PositionOf(EventPlayer()), 100);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.White, PositionOf(EventPlayer()), 5);
+    StopChasingVariable(strokeStrength);
+    strokeStrength = 0;
+}
+
+rule: "Score - Head"
+Event.OngoingPlayer
+if (DistanceBetween(EyePosition(EventPlayer()), currHolePos) <= AbsoluteValue(2))
+if (gameRunning == 1)
+if (DistanceBetween(EyePosition(EventPlayer()), currHolePos) != AbsoluteValue(0))
+if (IsAlive(EventPlayer()) == true)
+{
+    Kill(EventPlayer(), null);
+    finishedHole = 1;
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, PositionOf(EventPlayer()), 100);
+    PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.White, PositionOf(EventPlayer()), 5);
+    StopChasingVariable(strokeStrength);
+    strokeStrength = 0;
+}
+
+rule: "Endgame spoilers"
+Event.OngoingPlayer
+if (holeIndex == 18)
+if (goingToNextHole == 1)
+if (gameRunning == 1)
+if (LastOf(SortedArray(AllPlayers(Team.All), ScoreOf(ArrayElement()))) == EventPlayer())
+{
+    DeclarePlayerVictory(EventPlayer());
+}
+
+rule: "t = 90"
+if (gameRunning == 1)
+if (timeRemainingInHole > 88)
+{
+    SetInvisible(AllPlayers(Team.All), InvisibleTo.All);
+}
+
+rule: "stroke 1"
+Event.OngoingPlayer
+if (gameRunning == 1)
+if (holeScore > 0)
+{
+    SetInvisible(EventPlayer(), InvisibleTo.None);
+}
+
+rule: "if player is dead, do this stuff"
+Event.OngoingPlayer
+if (IsDead(EventPlayer()) == true)
+if (gameRunning == 1)
+if (finishedHole == 0)
+{
+    totalScore += 5;
+    SetPlayerScore(EventPlayer(), totalScore * -1);
+    StopChasingVariable(strokeStrength);
+    strokeStrength = 0;
+}
+
+rule: "Set scoreboard"
+Event.OngoingPlayer
+if (IsDead(EventPlayer()) == true)
+{
+    SetPlayerScore(EventPlayer(), totalScore * -1);
+}
+
+rule: "If time = 0, advance"
+if (timeRemainingInHole == 0)
+if (gameRunning == 1)
+{
+    AllLivingPlayers(Team.All).totalScore += 10;
+    Resurrect(AllPlayers(Team.All));
+    Teleport(AllPlayers(Team.All), Vector(0, 10000, 0));
+    goingToNextHole = 1;
+    WaitUntil(goingToNextHole == 0, 100);
+    Resurrect(AllDeadPlayers());
+}
+
+rule: "If all are dead, advance"
+if (NumberOfDeadPlayers(Team.All) == NumberOfPlayers(Team.All))
+if (gameRunning == 1)
+{
+    Resurrect(AllPlayers(Team.All));
+    Teleport(AllPlayers(Team.All), Vector(0, 10000, 0));
+    goingToNextHole = 1;
+}
+
+disabled rule: "[BUG PATCH] If game is going is going and someone is stuck really high up, tp them to the start"
+Event.OngoingPlayer
+if (gameRunning == 1)
+if (YOf(PositionOf(EventPlayer())) > 100)
+if (timeRemainingInHole > 0)
+if (IsAlive())
+{
+    Wait(0.5, WaitBehavior.AbortWhenFalse);
+    Teleport(EventPlayer(), holeStarts[holeIndex2]);
+    SetFacing(EventPlayer(), DirectionTowards(EyePosition(EventPlayer()), holeEnds[holeIndex2]), Relative.ToWorld);
+}
+
+rule: "Camera Stop"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Crouch) == false)
+{
+    StopCamera(EventPlayer());
+}
+
+rule: "BW - TP up"
+Event.OngoingPlayer
+if (YOf(PositionOf(EventPlayer())) < 14)
+if (holeIndex == 17)
+if ((CurrentMap() == Map.Blizzard_World_Winter || CurrentMap() == Map.Blizzard_World) == true)
+{
+    Teleport(EventPlayer(), Vector(-125, 15.68, 91.5));
+}
+
+rule: "Eich - Teleport if hole 18 fall"
+Event.OngoingPlayer
+if (holeIndex == 18)
+if (YOf(PositionOf(EventPlayer())) < 58)
+if ((CurrentMap() == Map.Eichenwalde || CurrentMap() == Map.Eichenwalde_Halloween) == true)
+{
+    Teleport(EventPlayer(), Vector(78.21, 71.67, -57.31));
+    MinWait();
+    AbortIfConditionIsFalse();
+    Loop();
+}
+
+rule: "kill on enter"
+Event.OngoingPlayer
+if (gameRunning == 1)
+if (ArrayContains(currentPlayers, EventPlayer()) != true)
+if (IsAlive(EventPlayer()) == true)
+if (HasSpawned(EventPlayer()) == true)
+if (incrDecrStrokeStrength == 0)
+{
+    Kill(EventPlayer(), null);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    CreateHudText(EventPlayer(), strokeStrength, <@"Attack">, null, Location.Top, 0, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), <@"<0> / <1>", holeIndex, 18>, <@"Round">, null, Location.Left, -1, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), totalScore, <@"<0> <1>", @"Total", @"Score">, null, Location.Left, -0.5, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), holeScore, <@"<0> <1>", @"Round", @"Score">, null, Location.Left, 0, Color.Purple, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    SetMoveSpeed(EventPlayer(), AbsoluteValue(0));
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    DisableRespawning(EventPlayer());
+    // EnableSpectate(AllPlayers(Team.All));
+    CreateHudText(EventPlayer(), <@"Good">, null, null, Location.Right, 0, Color.Green, Color.Green, Color.Green, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    okToShootText = LastTextID();
+    incrDecrStrokeStrength = 1;
+    ForceThrottle(EventPlayer(), 0, 0, 0, 0, 0, 0);
+    totalScore = 10000;
+    SetPlayerScore(EventPlayer(), totalScore * -1);
+    canShootMode = 1;
+    kindaUselessNgl = LastTextID();
+    CreateHudText(EventPlayer(), null, null, "Hold primary fire to charge your stroke, release to take a shot.", Location.Right, 3, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[0] = LastTextID();
+    CreateHudText(EventPlayer(), null, null, "Get to the green sphere (under the flag) in as few strokes as possible.", Location.Right, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[1] = LastTextID();
+    CreateHudText(EventPlayer(), null, null, "Hold crouch to see the position of the hole.", Location.Right, 5, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[2] = LastTextID();
+    CreateHudText(EventPlayer(), null, null, "Interact (F) to close instructions.", Location.Right, 6, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    instructions[3] = LastTextID();
+}
+
+rule: "Set facing"
+Event.OngoingPlayer
+if (goingToNextHole == 1)
+{
+    Wait(0.025, WaitBehavior.IgnoreCondition);
+    SetFacing(EventPlayer(), DirectionTowards(EyePosition(EventPlayer()), ArraySlice(holeEnds, holeIndex2 - 1, 1)), Relative.ToWorld);
+}
+
+rule: "Hole Advancing"
+if (goingToNextHole == 1)
+if (gameRunning == 1)
+if (holeIndex < 18)
+{
+    MinWait();
+    DestroyHudText(AllPlayers(Team.All).kindaUselessNgl);
+    DestroyEffect(holeSphere);
+    DestroyIcon(holeFlagIcon);
+    holeIndex += 1;
+    timeRemainingInHole = 90;
+    ChaseVariableAtRate(timeRemainingInHole, 0, 1, RateChaseReevaluation.DestinationAndRate);
+    currHolePos = ArraySlice(holeEnds, holeIndex2, 1);
+    CreateEffect(AllPlayers(Team.All), Effect.Sphere, Color.Green, currHolePos, 2, EffectRev.VisibleTo);
+    holeSphere = LastCreatedEntity();
+    Teleport(AllPlayers(Team.All), ArraySlice(holeStarts, holeIndex2, 1));
+    BigMessage(AllPlayers(Team.All), <@"<0>!", <@"Round <0>", holeIndex>>);
+    holeIndex2 += 1;
+    goingToNextHole = 0;
+    MinWait();
+    AllPlayers(Team.All).finishedHole = 0;
+    AllPlayers(Team.All).holeScore = 0;
+    CreateIcon(AllPlayers(Team.All), currHolePos + flagOffset, Icon.Flag, IconRev.VisibleTo, Color.Red, true);
+    holeFlagIcon = LastCreatedEntity();
+}
+
+rule: "Camera"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+if (gameRunning == 1)
+{
+    StartCamera(EventPlayer(), ArraySlice(holeCameraPos, holeIndex2 - 1, 1), ArraySlice(holeCameraTargets, holeIndex2 - 1, 1), 0);
+}
+
+rule: "epic pp extender"
+Event.OngoingPlayer
+if (strokeStrength > 0)
+{
+    CreateBeamEffect(EventPlayer(), BeamType.GrappleBeam, EyePosition(EventPlayer()) + FacingDirectionOf(EventPlayer()) * 0.1 - Vector(0, 0.145, 0), EyePosition(EventPlayer()) + FacingDirectionOf(EventPlayer()) * 0.017 * strokeStrength, Color.White, EffectRev.VisibleToPositionAndRadius);
+    ppBeam = LastCreatedEntity();
+}
+
+rule: "epic pp disappearer"
+Event.OngoingPlayer
+if (strokeStrength == 0)
+{
+    DestroyEffect(ppBeam);
+}
+
+disabled rule: "Here's a secret discord since you're here: https://discord.gg/nAbyuVM"
+Event.OngoingPlayer
+if (easterEggTrigger == 7)
+if (HeroOf(EventPlayer()) == Hero.Torbjorn)
+if (IsAlive(EventPlayer()) == true)
+if (HasSpawned(EventPlayer()) == true)
+{
+    Wait(0.25, WaitBehavior.AbortWhenFalse);
+    ForcePlayerHero(EventPlayer(), Hero.Lucio);
+    SetRespawnMaxTime(EventPlayer(), 9999);
+    DisableRespawning(EventPlayer());
+}
+
+rule: "destroy instructions"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+{
+    DestroyHudText(instructions[0]);
+    DestroyHudText(instructions[1]);
+    DestroyHudText(instructions[2]);
+    DestroyHudText(instructions[3]);
+}
