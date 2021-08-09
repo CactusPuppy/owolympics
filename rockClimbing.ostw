@@ -1,0 +1,444 @@
+import "rockClimbing.lobby";
+
+globalvar define startTimerFlag;
+playervar define heroIndex = 0;
+globalvar define heroList;
+playervar define playerLevel;
+playervar define playerFinished;
+playervar define useless;
+
+rule: "PAUSE MATCH TIME"
+{
+    PauseMatchTime();
+    DisableCompletion();
+    SetMatchTime(WorkshopSettingInteger("Settings", "Total Match Duration", 900, 60, 1200));
+    Wait(1, WaitBehavior.IgnoreCondition);
+    startTimerFlag = 1;
+}
+
+Boolean playerCompleted(Player p): p.playerFinished;
+
+rule: "When time runs out or all finish, declare the victor"
+Event.OngoingGlobal
+if (startGameFlag)
+if (MatchTime() == 0 || IsTrueForAll(AllPlayers(), playerCompleted(ArrayElement())))
+{
+    CreateHudText(AllPlayers(), <"<0> Wins!", FirstOf(scoreboardArray)>, HeaderColor: Color.Yellow, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, null, Vector(39.592, 96.658, 22.437), 200);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, null, Vector(61.873, 88, -69.127), 200);
+    Wait(3);
+    DeclareTeamVictory(TeamOf(FirstOf(scoreboardArray)));
+}
+
+import "freezeUntilStart.ostw";
+
+disabled rule: "MATCH TIME = TIME ELAPSED"
+if (startTimerFlag == 1)
+{
+    Wait(1, WaitBehavior.IgnoreCondition);
+    SetMatchTime(MatchTime() + 1);
+    Loop();
+}
+
+rule: "Start match time"
+if (startGameFlag)
+{
+    UnpauseMatchTime();
+}
+
+rule: "NO DAMAGE"
+Event.OnDamageTaken
+{
+    SetDamageReceived(EventPlayer(), 0.001);
+}
+
+rule: "NO COLLISION (unless ZARYA, SOLDIER or reinhardt)"
+Event.OngoingPlayer
+{
+    if (ArrayContains([14, 18, 22], heroIndex)) {
+        ClearStatus(EventPlayer(), Status.PhasedOut);
+    } else {
+        SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    }    
+    WaitUntil(heroIndex != EvaluateOnce(heroIndex), 1000000);
+    Loop();
+}
+
+rule: "REINHARDT CAN JUMP in air"
+Event.OngoingPlayer
+if (heroIndex == 21)
+if (IsButtonHeld(EventPlayer(), Button.Jump) == true)
+{
+    ApplyImpulse(EventPlayer(), Up(), 10, Relative.ToPlayer, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Forward(), 20, Relative.ToPlayer, ContraryMotion.Cancel);
+}
+
+String formatTime(Number t): <"<0>:<1><2>.<3>",
+    RoundToInteger(t / 60 % 60, Rounding.Down),
+    t % 60 < 10 ? 0 : "",
+    RoundToInteger(t % 60, Rounding.Down),
+    StringSlice(<"<0>", t % 1>, IndexOfStringChar(<"<0>", t % 1>, ".") + 1, 2)
+>;
+
+playervar Number currTime;
+playervar Number bestTime;
+
+rule: "HUD"
+Event.OngoingPlayer
+{
+    CreateHudText(EventPlayer(), HeroIconString(heroList[heroIndex + 1]), <@"Next Hero">, heroList[heroIndex + 1], Location.Left, 0, Color.Purple, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "HERO LIST"
+{
+    heroList = [
+        Hero.Mercy,         /*0*/
+        Hero.Winston,       /*1*/
+        Hero.Dva,           /*2*/
+        Hero.Pharah,        /*3*/
+        Hero.Reaper,        /*4*/
+        Hero.Lucio,         /*5*/
+        Hero.Widowmaker,    /*6*/
+        Hero.Ashe,          /*7*/
+        Hero.Sombra,        /*8*/
+        Hero.Doomfist,      /*9*/
+        Hero.Moira,         /*10*/
+        Hero.Genji,         /*11*/
+        Hero.Brigitte,      /*12*/
+        Hero.Hanzo,         /*13*/
+        Hero.Zarya,         /*14*/
+        Hero.Junkrat,       /*15*/
+        Hero.Baptiste,      /*16*/
+        Hero.WreckingBall,  /*17*/
+        Hero.Soldier76,     /*18*/
+        Hero.Symmetra,      /*19*/
+        Hero.Mei,           /*20*/
+        Hero.Reinhardt      /*21*/
+    ];
+}
+
+rule: "FORCE NEW HERO"
+Event.OngoingPlayer
+if (HeroOf(EventPlayer()) != heroList[heroIndex])
+{
+    ForcePlayerHero(EventPlayer(), heroList[heroIndex]);
+    Wait(1, WaitBehavior.IgnoreCondition);
+    PreloadHero(EventPlayer(), ArraySlice(heroList, heroIndex + 1, 12));
+}
+
+rule: "RINGS"
+{
+    CreateEffect(PlayersWithinRadius(Vector(50.96, 62.713, 56.451), 90, Team.All, RadiusLOS.Off), Effect.Sphere, Color.Red, Vector(78.275, -174, 41.384), 200, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(PlayersWithinRadius(Vector(50.96, 62.713, 56.451), 90, Team.All, RadiusLOS.Off), Effect.Sphere, Color.Red, Vector(50.96, 62.713, 56.451), 80, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(PlayersWithinRadius(Vector(37.471, 78.861, -150.407), 130, Team.All, RadiusLOS.Off), Effect.Sphere, Color.Red, Vector(37.471, -171.6, -150.407), 200, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(PlayersWithinRadius(Vector(37.471, 77.861, -150.407), 130, Team.All, RadiusLOS.Off), Effect.Sphere, Color.Red, Vector(37.471, 77.861, -150.407), 120, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(PlayersWithinRadius(Vector(37.471, 77.861, -150.407), 130, Team.All, RadiusLOS.Off), Effect.Sphere, Color.Red, Vector(-30.215, 101.471, -74.526), 83.5, EffectRev.VisibleToPositionAndRadius);
+}
+
+rule: "ORBS and icons"
+{
+    CreateIcon(PlayersWithinRadius(Vector(50.96, 62.713, 56.451), 90, Team.All, RadiusLOS.Off), Vector(39.592, 98.658, 22.437), Icon.Flag, IconRev.VisibleToAndPosition, Color.Green, true);
+    CreateEffect(PlayersWithinRadius(Vector(50.96, 62.713, 56.451), 90, Team.All, RadiusLOS.Off), Effect.Orb, Color.Green, Vector(39.592, 96.658, 22.437), 10, EffectRev.VisibleToPositionAndRadius);
+    CreateIcon(PlayersWithinRadius(Vector(50.96, 62.713, 56.451), 90, Team.All, RadiusLOS.Off), Vector(59.217, 37.837, 76.732), Icon.X, IconRev.VisibleToAndPosition, Color.Red, false);
+    CreateEffect(PlayersWithinRadius(Vector(50.96, 62.713, 56.451), 90, Team.All, RadiusLOS.Off), Effect.Orb, Color.Red, Vector(59.217, 35.837, 76.732), 5, EffectRev.VisibleToPositionAndRadius);
+    CreateIcon(PlayersWithinRadius(Vector(37.471, 77.861, -150.407), 130, Team.All, RadiusLOS.Off), Vector(61.873, 90, -69.127), Icon.Flag, IconRev.VisibleToAndPosition, Color.Green, true);
+    CreateEffect(PlayersWithinRadius(Vector(37.471, 77.861, -150.407), 130, Team.All, RadiusLOS.Off), Effect.Orb, Color.Green, Vector(61.873, 88, -69.127), 10, EffectRev.VisibleToPositionAndRadius);
+    CreateIcon(PlayersWithinRadius(Vector(37.471, 77.861, -150.407), 130, Team.All, RadiusLOS.Off), Vector(-8.987, 38.747, -219.183), Icon.X, IconRev.VisibleToAndPosition, Color.Red, false);
+    CreateEffect(PlayersWithinRadius(Vector(37.471, 77.861, -150.407), 130, Team.All, RadiusLOS.Off), Effect.Orb, Color.Red, Vector(-8.987, 36.747, -219.183), 5, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(PlayersOnHero(Hero.Reinhardt, Team.All), Effect.Orb, Color.Blue, Vector(91.929, 99, 53.766), 5, EffectRev.VisibleToPositionAndRadius);
+    CreateInWorldText(PlayersOnHero(Hero.Reinhardt, Team.All), <@"<0> <1>", @"Use_Ability 2", @"Here">, Vector(91.929, 100, 53.766), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    CreateInWorldText(PlayersOnHero(Hero.Reinhardt, Team.All), <@"<0> <1> <2>", @"Go", @"Level", 2>, Vector(91.929, 100.5, 53.766), 2, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    // CreateEffect(PlayersOnHero(Hero.Reinhardt, Team.All), Effect.Orb, Color.Blue, Vector(-1.655, 95.091, -165.921), 5, EffectRev.VisibleToPositionAndRadius);
+    // CreateInWorldText(PlayersOnHero(Hero.Reinhardt, Team.All), <@"<0> <1>", <@"Use_Ability 2">, <@"Here">>, Vector(-1.655, 96.091, -165.921), 1, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    // CreateInWorldText(PlayersOnHero(Hero.Reinhardt, Team.All), <@"<0> <1> <2>", @"Go", @"Level", 1>, Vector(-1.655, 96.591, -165.921), 2, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+}
+
+rule: "tp back 1"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(39.592, 96.658, 22.437)) < 5)
+if (playerLevel == 0)
+if (heroIndex < CountOf(heroList) - 2)
+{
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, EventPlayer(), 200);
+    SkipIf(heroIndex == 19, 1);
+    SmallMessage(EventPlayer(), <@"<0> <1> <2>", 20 - heroIndex, @"Heroes", @"Left">);
+    SkipIf(heroIndex != 19, 1);
+    SmallMessage(EventPlayer(), <@"<0> <1> <2>", 1, @"Hero", @"Left">);
+    SmallMessage(EventPlayer(), <@"<0> <1>", HeroIconString(HeroOf(EventPlayer())), @"Finished">);
+    Teleport(EventPlayer(), Vector(59.217, 35.987, 76.731));
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    heroIndex += 1;
+}
+
+rule: "tp back when won 1"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(39.592, 96.658, 22.437)) < 5)
+if (playerLevel == 0)
+if (heroIndex == CountOf(heroList) - 2)
+{
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, EventPlayer(), 200);
+    BigMessage(EventPlayer(), <@"You Win">);
+    SmallMessage(EventPlayer(), <@"<0> <1>", HeroIconString(HeroOf(EventPlayer())), @"Finished">);
+    Teleport(EventPlayer(), Vector(82.902, 100.452, 62.813));
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    heroIndex += 1;
+}
+
+rule: "DEATH RING 1"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(50.96, 62.713, 56.451)) > 80)
+if (playerLevel == 0)
+if (heroIndex < CountOf(heroList) - 1)
+{
+    Teleport(EventPlayer(), Vector(59.217, 35.987, 76.731));
+}
+
+rule: "death floor 1"
+Event.OngoingPlayer
+if (YOf(PositionOf(EventPlayer())) < 24.2)
+if (playerLevel == 0)
+if (heroIndex < CountOf(heroList) - 1)
+{
+    Teleport(EventPlayer(), Vector(59.217, 35.987, 76.731));
+}
+
+rule: "DEATH RING WHEN WON 1"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(50.96, 62.713, 56.451)) > 80)
+if (playerLevel == 0)
+if (heroIndex == CountOf(heroList) - 1)
+{
+    Teleport(EventPlayer(), Vector(82.902, 100.452, 62.813));
+}
+
+rule: "death floor WHEN WON 1"
+Event.OngoingPlayer
+if (YOf(PositionOf(EventPlayer())) < 24.2)
+if (playerLevel == 0)
+if (heroIndex == CountOf(heroList) - 1)
+{
+    Teleport(EventPlayer(), Vector(82.902, 100.452, 62.813));
+}
+
+rule: "NEXT LEVEL TP 1"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(91.929, 100.802, 53.766)) < 10)
+if (playerLevel == 0)
+if (heroIndex == CountOf(heroList) - 1)
+if (IsButtonHeld(EventPlayer(), Button.Ability2) == true)
+if (playerFinished == false)
+{
+    heroIndex = 0;
+    playerLevel = 1;
+    useless = 0;
+    MinWait();
+    Teleport(EventPlayer(), Vector(-8.987, 36.747, -219.183));
+}
+
+rule: "BACK TO SECOND LEVEL TP 1"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(91.929, 100.802, 53.766)) < 5)
+if (playerLevel == 0)
+if (heroIndex == CountOf(heroList) - 1)
+if (IsButtonHeld(EventPlayer(), Button.Ability2) == true)
+{
+    playerLevel = 1;
+    Teleport(EventPlayer(), Vector(-8.987, 36.747, -219.183));
+}
+
+rule: "tp back 2"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(61.873, 88, -69.127)) < 5)
+if (playerLevel == 1)
+if (heroIndex < CountOf(heroList) - 2)
+{
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, EventPlayer(), 200);
+    SkipIf(heroIndex == 19, 1);
+    SmallMessage(EventPlayer(), <@"<0> <1> <2>", 20 - heroIndex, @"Heroes", @"Left">);
+    SkipIf(heroIndex != 19, 1);
+    SmallMessage(EventPlayer(), <@"<0> <1> <2>", 1, @"Hero", @"Left">);
+    SmallMessage(EventPlayer(), <@"<0> <1>", HeroIconString(HeroOf(EventPlayer())), @"Finished">);
+    Teleport(EventPlayer(), Vector(-8.987, 36.747, -219.183));
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    heroIndex += 1;
+    MinWait();
+    AbortIf(heroIndex != 19);
+    Teleport(EventPlayer(), Vector(-11.439, 96.771, -181.379));
+}
+
+rule: "tp back when won 2"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(61.873, 88, -69.127)) < 5)
+if (playerLevel == 1)
+if (heroIndex == CountOf(heroList) - 2)
+{
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, EventPlayer(), 200);
+    BigMessage(EventPlayer(), <@"You Win">);
+    SmallMessage(EventPlayer(), <@"<0> <1>", HeroIconString(HeroOf(EventPlayer())), @"Finished">);
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    heroIndex += 1;
+    Teleport(EventPlayer(), Vector(-11.439, 96.771, -181.379));
+    playerFinished = true;
+}
+
+rule: "DEATH RING 2"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(37.471, 77.861, -150.407)) > 120)
+if (playerLevel == 1)
+if (heroIndex != 19)
+if (heroIndex < CountOf(heroList) - 1)
+{
+    Teleport(EventPlayer(), Vector(-8.987, 36.747, -219.183));
+}
+
+rule: "DEATH FLOOR 2"
+Event.OngoingPlayer
+if (YOf(PositionOf(EventPlayer())) < 26.6)
+if (playerLevel == 1)
+if (heroIndex != 19)
+if (heroIndex < CountOf(heroList) - 1)
+{
+    Teleport(EventPlayer(), Vector(-8.987, 36.747, -219.183));
+}
+
+rule: "DEATH CEILING 2"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(-30.215, 101.471, -74.526)) < 82.5)
+if (playerLevel == 1)
+if (heroIndex != 19)
+if (heroIndex < CountOf(heroList) - 1)
+{
+    Teleport(EventPlayer(), Vector(-8.987, 36.747, -219.183));
+    CreateEffect(EventPlayer(), Effect.Sphere, Color.Red, Vector(-30.215, 101.471, -74.526), 84, EffectRev.VisibleToPositionAndRadius);
+}
+
+rule: "DEATH RING WHEN WON 2"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(37.471, 77.861, -150.407)) > 120)
+if (playerLevel == 1)
+if (heroIndex == (heroIndex == 19 || heroIndex == 21))
+{
+    Teleport(EventPlayer(), Vector(-11.439, 96.77, -181.379));
+}
+
+rule: "death floor WHEN WON 2"
+Event.OngoingPlayer
+if (YOf(PositionOf(EventPlayer())) < 26.6)
+if (playerLevel == 1)
+if (heroIndex == (heroIndex == 19 || heroIndex == 21))
+{
+    Teleport(EventPlayer(), Vector(-11.439, 96.771, -181.379));
+}
+
+rule: "DEATH CEILING WHEN WON 2"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(-30.215, 101.471, -74.526)) < 82.5)
+if (playerLevel == 1)
+if (heroIndex == (heroIndex == 19 || heroIndex == 21))
+{
+    Teleport(EventPlayer(), Vector(-11.439, 96.771, -181.379));
+}
+
+disabled rule: "BACK TO FIRST LEVEL TP 2"
+Event.OngoingPlayer
+if (DistanceBetween(EventPlayer(), Vector(-1.655, 95.591, -165.921)) < 5)
+if (playerLevel == 1)
+if (heroIndex == 21)
+if (IsButtonHeld(EventPlayer(), Button.Ability2) == true)
+if (playerFinished == true)
+{
+    playerLevel = 0;
+    Teleport(EventPlayer(), Vector(82.902, 100.452, 62.813));
+}
+
+rule: "low gravity for MOIRA 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex == 8)
+{
+    SetGravity(EventPlayer(), 70);
+}
+
+rule: "low gravity for DOOMFIST 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex == 10)
+{
+    SetGravity(EventPlayer(), 60);
+}
+
+rule: "low gravity for brigITTE 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex == 12)
+{
+    SetGravity(EventPlayer(), 50);
+}
+
+rule: "low gravity for HANZO AND ZARYA 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex >= 13)
+if (heroIndex <= 14)
+{
+    SetGravity(EventPlayer(), 80);
+}
+
+rule: "low gravity for BAPTISTE 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex == 16)
+{
+    SetGravity(EventPlayer(), 75);
+    SetMoveSpeed(EventPlayer(), 110);
+}
+
+rule: "low gravity for SOLDIER 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex == 18)
+{
+    SetGravity(EventPlayer(), 70);
+}
+
+rule: "low gravity for MEI 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex == 20)
+{
+    SetGravity(EventPlayer(), 60);
+}
+
+rule: "NORMAL Gravity 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex != 10)
+if (heroIndex != 12)
+if (heroIndex != 13)
+if (heroIndex != 14)
+if (heroIndex != 18)
+if (heroIndex != 20)
+{
+    SetGravity(EventPlayer(), 100);
+    SetMoveSpeed(EventPlayer(), 100);
+}
+
+rule: "low gravity for MOIRA 2"
+Event.OngoingPlayer
+if (playerLevel == 1)
+if (heroIndex == 10)
+{
+    SetGravity(EventPlayer(), 60);
+}
+
+Number effectiveScore: Min(heroIndex, CountOf(heroList) - 1) + playerLevel * (CountOf(heroList) - 1);
+
+rule: "Keep score up to date"
+Event.OngoingPlayer
+if (__playerScore != effectiveScore)
+{
+    __playerScore = effectiveScore;
+}
+
+import "scoreboard.ostw";
+// import "noclip.ostw";

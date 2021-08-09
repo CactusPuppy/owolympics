@@ -1,0 +1,264 @@
+{
+  "Lobby": {
+    "Map Rotation": "Paused",
+    "Max Spectators": 12,
+    "Return To Lobby": "Never"
+  },
+  "Modes": {
+    "All": {
+      "Allow Hero Switching": false,
+      "Game Mode Start": "Immediately",
+      "Hero Limit": "Off",
+      "Respawn As Random Hero": true,
+      "Respawn Time Scalar": 0.0,
+      "Spawn Health Packs": "Disabled"
+    },
+    "Skirmish": {
+      "Enabled Maps": [
+        "Watchpoint: Gibraltar"
+      ]
+    }
+  },
+  "Heroes": {
+    "General": {
+      "Disabled Heroes": [
+        "Ana",
+        "Bastion",
+        "Echo",
+        "Mccree",
+        "Orisa",
+        "Roadhog",
+        "Sigma",
+        "Torbjörn",
+        "Tracer",
+        "Zenyatta"
+      ],
+      "General": {
+        "Damage Dealt": 10.0,
+        "Damage Received": 10.0,
+        "Healing Dealt": 500.0,
+        "Healing Received": 500.0,
+        "Health": 500.0,
+        "Infinite Ultimate Duration": true,
+        "No Ammunition Requirement": true,
+        "Spawn With Ultimate Ready": true
+      },
+      "Ashe": {
+        "Coach Gun Cooldown Time": 10.0,
+        "Coach Gun Knockback Scalar (Enemy)": 0.0,
+        "Coach Gun Knockback Scalar (Self)": 78.0,
+        "Dynamite": false,
+        "No Automatic Fire": true,
+        "No Scope": true,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Ultimate Ability (B.O.B.)": false
+      },
+      "Baptiste": {
+        "Immortality Field": false,
+        "Jump Vertical Speed": 110.0,
+        "Movement Gravity": 75.0,
+        "Movement Speed": 130.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Regenerative Burst": false,
+        "Secondary Fire": false,
+        "Ultimate Ability (Amplification Matrix)": false
+      },
+      "Brigitte": {
+        "Barrier Shield Cooldown Time": 0.0,
+        "Barrier Shield Recharge Rate": 500.0,
+        "Movement Gravity": 70.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Repair Pack": false,
+        "Shield Bash Cooldown Time": 2.0,
+        "Shield Bash Knockback Scalar": 25.0,
+        "Ultimate Ability (Rally)": false,
+        "Whip Shot": false
+      },
+      "D.va": {
+        "Boosters Cooldown Time": 10.0,
+        "Boosters Knockback Scalar": 0.0,
+        "Call Mech Knockback Scalar": 0.0,
+        "Defense Matrix": false,
+        "Micro Missiles": false,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Ultimate Ability (Self-Destruct)": false
+      },
+      "Doomfist": {
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Rising Uppercut Cooldown Time": 60.0,
+        "Rising Uppercut Knockback Scalar": 0.0,
+        "Rocket Punch Cooldown Time": 60.0,
+        "Rocket Punch Knockback Scalar": 0.0,
+        "Seismic Slam": false,
+        "Ultimate Ability (Meteor Strike)": false
+      },
+      "Genji": {
+        "Deflect": false,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Secondary Fire": false,
+        "Spawn With Ultimate Ready": true,
+        "Swift Strike Cooldown Time": 50.0,
+        "Ultimate Ability (Dragonblade)": false
+      },
+      "Hanzo": {
+        "Lunge Cooldown Time": 50.0,
+        "Lunge Distance Scalar": 175.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Sonic Arrow": false,
+        "Storm Arrows": false,
+        "Ultimate Ability (Dragonstrike)": false
+      },
+      "Junkrat": {
+        "Concussion Mine Cooldown Time": 20.0,
+        "Concussion Mine Knockback Scalar": 85.0,
+        "Frag Launcher Knockback Scalar": 0.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Steel Trap": false,
+        "Ultimate Ability (Rip-Tire)": false
+      },
+      "Lúcio": {
+        "Amp It Up": false,
+        "Crossfade": false,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Soundwave": false,
+        "Ultimate Ability (Sound Barrier)": false
+      },
+      "Mei": {
+        "Cryo-Freeze": false,
+        "Freeze Stacking": true,
+        "Ice Wall Cooldown Time": 0.0,
+        "Jump Vertical Speed": 150.0,
+        "Movement Gravity": 47.0,
+        "Movement Speed": 130.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Secondary Fire": false,
+        "Ultimate Ability (Blizzard)": false
+      },
+      "Mercy": {
+        "Guardian Angel": false,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Resurrect": false,
+        "Secondary Fire": false,
+        "Spawn With Ultimate Ready": true,
+        "Ultimate Generation - Combat (Valkyrie)": 500.0,
+        "Ultimate Generation - Passive (Valkyrie)": 500.0,
+        "Ultimate Generation (Valkyrie)": 500.0
+      },
+      "Moira": {
+        "Biotic Orb": false,
+        "Fade Cooldown Time": 3.0,
+        "Jump Vertical Speed": 110.0,
+        "Movement Gravity": 90.0,
+        "Movement Speed": 150.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Secondary Fire": false,
+        "Ultimate Ability (Coalescence)": false
+      },
+      "Pharah": {
+        "Concussive Blast": false,
+        "Hover Jets Maximum Time": 120.0,
+        "Hover Jets Recharge Rate": 120.0,
+        "Hover Jets Vertical Speed Scalar": 120.0,
+        "Jump Jet Cooldown Time": 30.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Spawn With Ultimate Ready": true,
+        "Ultimate Ability (Barrage)": false
+      },
+      "Reaper": {
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Shadow Step Cooldown Time": 0.0,
+        "Ultimate Ability (Death Blossom)": false,
+        "Wraith Form": false
+      },
+      "Reinhardt": {
+        "Barrier Field Cooldown Time": 0.0,
+        "Barrier Field Recharge Rate": 500.0,
+        "Charge Cooldown Time": 0.0,
+        "Charge Knockback Scalar": 300.0,
+        "Fire Strike Cooldown Time": 0.0,
+        "Rocket Hammer Knockback Scalar": 400.0,
+        "Spawn With Ultimate Ready": true,
+        "Ultimate Generation - Combat (Earthshatter)": 500.0,
+        "Ultimate Generation - Passive (Earthshatter)": 500.0,
+        "Ultimate Generation (Earthshatter)": 500.0
+      },
+      "Soldier: 76": {
+        "Biotic Field": false,
+        "Helix Rockets Cooldown Time": 10.0,
+        "Helix Rockets Knockback Scalar": 200.0,
+        "Jump Vertical Speed": 120.0,
+        "Movement Gravity": 80.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Ultimate Ability (Tactical Visor)": false
+      },
+      "Sombra": {
+        "Hack": false,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Stealth Cooldown Time": 0.0,
+        "Translocator Cooldown Time": 30.0,
+        "Ultimate Ability (EMP)": false
+      },
+      "Symmetra": {
+        "Jump Vertical Speed": 250.0,
+        "Movement Gravity": 25.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Secondary Fire": false,
+        "Sentry Turret": false,
+        "Teleporter Cooldown Time": 0.0,
+        "Ultimate Ability (Photon Barrier)": false
+      },
+      "Widowmaker": {
+        "Grappling Hook Cooldown Time": 24.0,
+        "No Automatic Fire": true,
+        "No Scope": true,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Ultimate Ability (Infra-sight)": false,
+        "Venom Mine": false
+      },
+      "Winston": {
+        "Barrier Projector": false,
+        "Jump Pack Acceleration Scalar": 120.0,
+        "Jump Pack Cooldown Time": 30.0,
+        "Jump Pack Knockback Scalar": 0.0,
+        "Primary Fire": false,
+        "Quick Melee": false,
+        "Ultimate Ability (Primal Rage)": false
+      },
+      "Wrecking Ball": {
+        "Adaptive Shield": false,
+        "Grappling Claw Cooldown Time": 45.0,
+        "Piledriver": false,
+        "Quick Melee": false,
+        "Ultimate Ability (Minefield)": false
+      },
+      "Zarya": {
+        "No Ammunition Requirement": true,
+        "Particle Barrier": false,
+        "Particle Cannon Secondary Knockback Scalar": 400.0,
+        "Primary Fire": false,
+        "Projected Barrier": false,
+        "Quick Melee": false,
+        "Ultimate Ability (Graviton Surge)": false
+      }
+    }
+  },
+  "Description": "Rock climbing out of bounds! Reach the goal and get a new hero to climb with! When you've reached Reinhardt, use Firestrike on the blue orb on top of the crane to advance to the next mountain. Created by JeyzorZ"
+}
