@@ -1,0 +1,45 @@
+{
+  "Lobby": {
+    "Allow Players Who Are In Queue": true,
+    "Match Voice Chat": true,
+    "Max Spectators": 6,
+    "Return To Lobby": "After A Game",
+    "Max Team 1 Players": 12,
+    "Max Team 2 Players": 0
+  },
+  "Modes": {
+    "All": {
+      "Game Mode Start": "Immediately",
+      "Hero Limit": "Off",
+      "Kill Feed": false,
+      "Spawn Health Packs": "Disabled"
+    },
+    "Skirmish": {
+      "Enabled Maps": [
+        "Junkertown"
+      ]
+    }
+  },
+  "Heroes": {
+    "General": {
+      "Ana": {
+        "Ammunition Clip Size Scalar": 25.0,
+        "Biotic Grenade Cooldown Time": 65.0,
+        "Healing Dealt": 10.0,
+        "Healing Received": 10.0,
+        "Sleep Dart Cooldown Time": 90.0
+      },
+      "Doomfist": {
+        "Spawn With Ultimate Ready": true
+      },
+      "Sigma": {
+        "Accretion Cooldown Time": 0.0,
+        "Accretion Knockback Scalar": 0.0,
+        "Experimental Barrier Cooldown Time": 0.0,
+        "Experimental Barrier Recharge Rate": 0.0,
+        "Kinetic Grasp Cooldown Time": 20.0
+      }
+    }
+  },
+  "Description": "Ana Golf - Junkertown by ShnarfV2               [Ana Parkour Creation Kit Made By ReZero] ♠With input from dream♠"
+}

@@ -1,8 +1,7 @@
 globalvar Player[] scoreboardArray = [];
 
 playervar Boolean __hideScoreboard;
-playervar Number __playerScore;
-playervar Number __previousScore;
+playervar Number __playerScore = 0;
 playervar Number __i;
 
 rule: "Create player line for Spec Scoreboard HUD"
@@ -74,8 +73,8 @@ void updateScoreboardForPlayer() "SUB: Update scoreboardArray"
 
 rule: "If a player's score has changed, update their position in the scoreboardArray"
 Event.OngoingPlayer
-if (__previousScore != __playerScore)
 {
     updateScoreboardForPlayer();
-    __previousScore = __playerScore;
+    WaitUntil(EvaluateOnce(__playerScore) != __playerScore, 1000000);
+    Loop();
 }

@@ -1,0 +1,751 @@
+import "anaParkour-02.lobby";
+
+globalvar define mapIsPlayable;
+globalvar define Origins;
+globalvar define CPSize;
+globalvar define SpawnView;
+globalvar define Abilities;
+globalvar define stageAuras;
+globalvar define stageIterator;
+playervar define playerStageIndex;
+playervar define playerIsTimerEnabled;
+playervar define playerIsFreemodeEnabled;
+playervar define playerElapsedTime;
+playervar define playerElapsedBest;
+playervar define playerIconNextGoal;
+playervar define playerTextStatus;
+playervar define playerTextBestTime;
+playervar define AnaSleepStart;
+playervar define AnaSleepChase;
+playervar define devAbilitiesHUD;
+playervar define devViewAngleHUD;
+playervar define devRadiusHUD;
+playervar define devLocationHUD;
+playervar define devAuraPreview;
+playervar define devAllowNade;
+playervar define devAllowDart;
+playervar define devAllowPrimary;
+playervar define devRadius;
+playervar define devIsEnabled;
+playervar define TextGuideEnabled;
+playervar define TextGuideID;
+playervar define A;
+playervar define K;
+playervar define L;
+playervar define J;
+
+disabled rule: "▼ Variables ▼"
+{
+}
+
+rule: "Global Variables { A: Playable, B: Origins, C: Radii, D: View angles, E: Abilities, F: Auras, Z: Iterator }"
+{
+    DisableAnnouncer();
+    DisableCompletion();
+    DisableMusic();
+    DisableScoring();
+    PauseMatchTime();
+    SetMatchTime(WorkshopSettingInteger("Settings", "Time Limit (seconds)", 600, 0, 1800));
+    mapIsPlayable = [];
+    Origins = [];
+    CPSize = [];
+    SpawnView = [];
+    Abilities = [];
+    stageAuras = [];
+    stageIterator = 0;
+    WaitUntil(startGameFlag, 1000000);
+    UnpauseMatchTime();
+}
+
+rule: "Add Checkpoint origins"
+{
+    mapIsPlayable = 0;
+    # First level
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(44.54, 17.25, -75.048));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(26.942, 16.488, -95.143));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(28.851, 14.357, -64.166));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(23.394, 14.357, -57.37));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(12.143, 12.21, -45.408));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(10.729, 13.603, -72.928));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(41.154, 11.25, -69.915));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-13.419, 10.206, -32.206));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-9.298, 12.067, -70.564));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-8.815, 12.026, -49.782));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(3.167, 12.291, -43.33));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(30.165, 12.461, -81.589));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-3.77, 13.751, -75.081));
+    # Middle Level
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-52.647, 11.816, -49.561));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-20.748, 14.754, -91.389));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-33.013, 14.73, -97.242));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-64.331, 13.681, -98.597));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-46.165, 13.73, -66.232));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-36.725, 13.73, -62.838));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-40.859, 5.599, -73.613));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-55.554, 13.681, -91.462));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-59.689, 15.733, -111.719));
+    # End Level
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-59.708, 8.755, -112.384));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-51.261, 8.622, -127.662));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-57.519, 14.62, -149.177));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-98.226, 14.62, -138.681));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-69.008, 8.67, -168.367));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-57.01, 8.67, -159.883));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-61.054, 8.64, -117.913));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-84.617, 14.695, -158.268));
+    ModifyVariable(Origins, Operation.AppendToArray, Vector(-89.34, 9.306, -103.654));
+}
+
+rule: "Add Checkpoint radii"
+{
+    // Example of how it should look
+    // ModifyVariable(CPSize, Operation.AppendToArray, 2);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.3);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.3);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 3.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+    ModifyVariable(CPSize, Operation.AppendToArray, 2.5);
+}
+
+rule: "Add Checkpoint view angles"
+{
+    // Example of how it should look
+    // ModifyVariable(SpawnView, Operation.AppendToArray, 90);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 0);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 0);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 300);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 180);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 90);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 280);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 150);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 340);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 20);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 90);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 180);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 280);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 90);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 0);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 90);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 0);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 180);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 90);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 180);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 90);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 300);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 180);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 270);
+    ModifyVariable(SpawnView, Operation.AppendToArray, 180);
+}
+
+rule: "Add Checkpoint abilities { What The Player Is Allowed To Use: (Aim, Sleep, Nade) => (0 = allowed, 1 = locked) }"
+{
+    // Example of how it should look if Sleep Dart is disabled
+    // ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 1, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 1, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 0, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 1, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 0));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(1, 0, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 1));
+    ModifyVariable(Abilities, Operation.AppendToArray, Vector(0, 1, 0));
+}
+
+rule: "Player Variables { A: Handled, B: Index, C: Timer, D: Freeplay, E: Time, F: Best, G: idGoal, H: idFree, I: idBest }"
+Event.OngoingPlayer
+{
+    DisableRespawning(EventPlayer());
+    SetAllowedHeroes(EventPlayer(), Hero.Ana);
+    SetUltimateAbilityEnabled(EventPlayer(), false);
+    A = true;
+    playerStageIndex = 0;
+    playerIsTimerEnabled = true;
+    playerIsFreemodeEnabled = false;
+    playerElapsedTime = 0;
+    playerElapsedBest = 0;
+    playerIconNextGoal = null;
+    playerTextStatus = null;
+    playerTextBestTime = null;
+    AbortIf(EventPlayer() != HostPlayer());
+    devIsEnabled = false;
+    devRadius = 2;
+    // devAllowPrimary = [];
+    // devAllowDart = [];
+    // devAllowNade = [];
+    devAuraPreview = null;
+    devLocationHUD = null;
+    devRadiusHUD = null;
+    devViewAngleHUD = null;
+    devAbilitiesHUD = null;
+    // CreateHudText(EventPlayer(), null, null, <@"<0> - <1> - <2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>, Location.Left, 6, Color.White, Color.White, Color.Red, HudTextRev.String, Spectators.DefaultVisibility);
+    while (!HasSpawned(EventPlayer())) {
+        ForcePlayerHero(EventPlayer(), Hero.Ana);
+        Wait(0.25);
+    }
+}
+
+import "freezeUntilStart.ostw";
+
+disabled rule: "▼ Setup ▼  »Ignore These«"
+{
+}
+
+rule: "MapBuilding { Draw auras }"
+if (stageIterator < CountOf(Origins))
+{
+    SkipIf(CPSize[stageIterator] < 1.8, 2);
+    CreateEffect(AllPlayers(Team.All), Effect.Ring, Color.Green, Origins[stageIterator], CPSize[stageIterator], EffectRev.VisibleTo);
+    Skip(1);
+    CreateEffect(AllPlayers(Team.All), Effect.Cloud, Color.Green, Origins[stageIterator], 1, EffectRev.VisibleTo);
+    ModifyVariable(stageAuras, Operation.AppendToArray, LastCreatedEntity());
+    MinWait();
+    stageIterator += 1;
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "MapIsPlayable"
+if ((CountOf(Origins) > 1 && CountOf(Origins) == CountOf(CPSize) && CountOf(CPSize) == CountOf(SpawnView) && CountOf(SpawnView) == CountOf(Abilities)) == true)
+{
+    mapIsPlayable = true;
+}
+
+rule: "MapIsNotPlayable"
+if ((CountOf(Origins) > 1 && CountOf(Origins) == CountOf(CPSize) && CountOf(CPSize) == CountOf(SpawnView) && CountOf(SpawnView) == CountOf(Abilities)) == false)
+{
+    mapIsPlayable = false;
+    DestroyAllHudText();
+    DestroyAllIcons();
+}
+
+rule: "Player { Draw HUD, release handled state }"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+{
+    playerIconNextGoal = null;
+    playerTextStatus = null;
+    playerTextBestTime = null;
+    CreateHudText(EventPlayer(), null, null, <@"<0>: <1>", @"Checkpoint", <@"<0> / <1>", playerStageIndex + 1, CountOf(Origins)>>, Location.Left, 0, Color.White, Color.White, Color.White, HudTextRev.String, Spectators.DefaultVisibility);
+    // CreateHudText(EventPlayer(), null, null, <@"<0>: <1>", @"Time", playerElapsedTime>, Location.Top, 1, Color.White, Color.White, Color.White, HudTextRev.String, Spectators.DefaultVisibility);
+    // A = false;
+    # Creator Credits
+    CreateHudText(EventPlayer(), null, null, <@"<0>!", "![Code: ReZero & dream] - [Level: ShnarfV2]">, Location.Top, 1, Color.White, Color.White, Color.White, HudTextRev.String, Spectators.DefaultVisibility);
+    # Version
+    CreateHudText(EventPlayer(), null, null, "Version: 1.1.0.9", Location.Left, 0, Color.White, Color.White, Color.Orange, HudTextRev.String, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, null, "Green Flags are your next location, follow them.", Location.Top, 1, Color.White, Color.White, Color.Green, HudTextRev.String, Spectators.DefaultVisibility);
+}
+
+disabled rule: "▼ Events ▼   »Ignore These«"
+{
+}
+
+rule: "PlayerDied"
+Event.OnDeath
+{
+    MinWait();
+    Respawn(EventPlayer());
+}
+
+rule: "PlayerSpawn"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if (IsAlive(EventPlayer()) == true)
+{
+    ClearStatus(EventPlayer(), Status.PhasedOut);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 10000);
+    Teleport(EventPlayer(), Origins[playerStageIndex]);
+    SetFacing(EventPlayer(), DirectionFromAngles(SpawnView[playerStageIndex], 0), Relative.ToWorld);
+    SetStatus(EventPlayer(), null, Status.Hacked, 9999);
+    Wait(0.5, WaitBehavior.IgnoreCondition);
+    SkipIf(playerIsFreemodeEnabled, 3);
+    SetPrimaryFireEnabled(EventPlayer(), XOf(Abilities[playerStageIndex]) == 0);
+    SetAbility1Enabled(EventPlayer(), YOf(Abilities[playerStageIndex]) == 0);
+    SetAbility2Enabled(EventPlayer(), ZOf(Abilities[playerStageIndex]) == 0);
+    A = false;
+    ClearStatus(EventPlayer(), Status.Hacked);
+}
+
+rule: "PlayerReachGoal"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((A || playerStageIndex >= CountOf(Origins) - 1) == false)
+if ((IsOnGround(EventPlayer()) && DistanceBetween(PositionOf(EventPlayer()), Origins[playerStageIndex + 1]) <= CPSize[playerStageIndex + 1]) == true)
+{
+    A = true;
+    playerStageIndex += 1;
+    SkipIf(playerStageIndex == CountOf(Origins) - 1, 2);
+    Kill(EventPlayer(), null);
+    Abort();
+    PlayEffect(EventPlayer(), PlayEffect.BuffExplosionSound, Color.White, PositionOf(EventPlayer()), 75);
+    A = false;
+}
+
+rule: "PlayerFailed"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((A || playerStageIndex >= CountOf(Origins) - 1 || playerIsFreemodeEnabled) == false)
+if ((IsOnGround(EventPlayer()) && DistanceBetween(PositionOf(EventPlayer()), Origins[playerStageIndex]) >= CPSize[playerStageIndex]) == true)
+{
+    A = true;
+    Kill(EventPlayer(), null);
+}
+
+disabled rule: "▼ Effects ▼   »Ignore These«"
+{
+}
+
+rule: "ShowGoal { Show a checkpoint indicator for the destination }"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if (playerStageIndex < CountOf(Origins) - 1 == true)
+{
+    CreateIcon(EventPlayer(), Origins[playerStageIndex + 1] + Vector(0, 0.1, 0), Icon.Flag, IconRev.Position, Color.Green, true);
+    playerIconNextGoal = LastCreatedEntity();
+}
+
+rule: "HideGoal { Hide checkpoint indicator and stop the timer if it is running }"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if (playerStageIndex < CountOf(Origins) - 1 == false)
+{
+    DestroyIcon(playerIconNextGoal);
+    playerIconNextGoal = null;
+    SkipIf(!playerIsTimerEnabled, 1);
+    StopChasingVariable(playerElapsedTime);
+}
+
+rule: "StartTimer"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((playerStageIndex == 0 && playerIsTimerEnabled && IsInAir(EventPlayer())) == true)
+{
+    ChaseVariableAtRate(playerElapsedTime, 10000, 1, RateChaseReevaluation.None);
+}
+
+rule: "ResetTimer"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((!playerIsTimerEnabled || playerStageIndex == 0 && IsOnGround(EventPlayer())) == true)
+{
+    StopChasingVariable(playerElapsedTime);
+    playerElapsedTime = 0;
+}
+
+rule: "EnableTimer"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((playerStageIndex == 0 && !(playerIsTimerEnabled || playerIsFreemodeEnabled)) == true)
+{
+    playerIsTimerEnabled = true;
+}
+
+rule: "EnableAbilities"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((playerStageIndex >= CountOf(Origins) - 1 || playerIsFreemodeEnabled) == true)
+{
+    SetAbility1Enabled(EventPlayer(), true);
+    SetAbility2Enabled(EventPlayer(), true);
+    SetPrimaryFireEnabled(EventPlayer(), true);
+}
+
+disabled rule: "CheckForPersonalBest {can change colour of timer here}"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((playerIsTimerEnabled && playerStageIndex == CountOf(Origins) - 1) == true)
+if ((playerTextBestTime == null || playerElapsedTime < playerElapsedBest) == true)
+{
+    playerElapsedBest = playerElapsedTime;
+    BigMessage(AllPlayers(Team.All), <@"<0>: <1>", EventPlayer(), playerElapsedBest>);
+    SkipIf(playerTextBestTime == null, 1);
+    DestroyHudText(playerTextBestTime);
+    CreateHudText(AllPlayers(Team.All), null, null, <@"<0>: <1>", EventPlayer(), playerElapsedBest>, Location.Right, playerElapsedBest / 60, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    playerTextBestTime = LastTextID();
+}
+
+disabled rule: "▼ Actions ▼ »Used In-game«"
+{
+}
+
+rule: "RetryStage { Teleport back to current stage; press Ultimate}"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if (IsButtonHeld(EventPlayer(), Button.Melee) == true)
+{
+    AbortIf(A);
+    A = true;
+    Kill(EventPlayer(), null);
+}
+
+disabled rule: "ToggleFreemode { Disable failing and enable all abilities, will disable timer; press Ultimate + Crouch }"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((IsButtonHeld(EventPlayer(), Button.Ultimate) && IsButtonHeld(EventPlayer(), Button.Crouch)) == true)
+{
+    playerIsTimerEnabled = false;
+    playerIsFreemodeEnabled = !playerIsFreemodeEnabled;
+    SkipIf(playerIsFreemodeEnabled, 3);
+    DestroyHudText(playerTextStatus);
+    playerTextStatus = null;
+    Abort();
+    CreateHudText(EventPlayer(), null, null, <@"<0> - <1>", @"No", @"Failing">, Location.Left, 1, Color.White, Color.White, Color.Aqua, HudTextRev.String, Spectators.DefaultVisibility);
+    playerTextStatus = LastTextID();
+}
+
+disabled rule: "▼ If You Are Using Control Maps Like Oasis And You Want To Use All 3 Points ▼"
+{
+}
+
+disabled rule: "Stage 2 Init {used to teleport you to the second stage}"
+Event.OngoingPlayer
+# {Change this number to the last checkpoint of first stage then -1}  »the second number should be the same size as the radius of the checkpoint you need to land in, once you land there, you will teleport to whatever coordinates you wrote down«
+if (DistanceBetween(EventPlayer(), Origins[18]) <= 1.4)
+{
+    playerStageIndex += 1;
+    # {change this to the coordinates of the first checkpoint in the second stage} »Must have a checkpoint at the location of the teleport«
+    Teleport(EventPlayer(), Vector(217.504, 19, -0.104));
+}
+
+disabled rule: "Stage 3 Init {used to teleport you to the third stage}"
+Event.OngoingPlayer
+# {Change this number to the last checkpoint of Second stage then -1}  »the second number should be the same size as the radius of the checkpoint you need to land in, once you land there, you will teleport to whatever coordinates you wrote down«
+if (DistanceBetween(EventPlayer(), Origins[38]) <= 1.8)
+{
+    playerStageIndex += 1;
+    # {change this to the coordinates of the first checkpoint in the third stage} »Must have a checkpoint at the location of the teleport«
+    Teleport(EventPlayer(), Vector(100.443, 4.314, 313.446));
+}
+
+disabled rule: "▼ Abilities ▼"
+{
+}
+
+disabled rule: "Sleep Dart Teleport {v1}"
+Event.OngoingPlayer
+if (IsUsingAbility1(EventPlayer()) == true)
+{
+    Wait(0.3, WaitBehavior.AbortWhenFalse);
+    AnaSleepStart = EyePosition(EventPlayer());
+    AnaSleepChase = RayCastHitPosition(AnaSleepStart, AnaSleepStart + 60 * 4 * FacingDirectionOf(EventPlayer()), AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), EventPlayer(), true);
+    if (DistanceBetween(AnaSleepStart, AnaSleepChase) < 60 * 4 - 0.5)
+    {
+        Wait(DistanceBetween(AnaSleepStart, AnaSleepChase) / 60, WaitBehavior.IgnoreCondition);
+        MinWait();
+        Teleport(EventPlayer(), AnaSleepChase + 1.3 * DirectionTowards(AnaSleepChase, AnaSleepStart));
+    }
+}
+
+void Sub0() "Sleep Dart Teleport {v2}"
+{
+    Wait(0.3, WaitBehavior.AbortWhenFalse);
+    K = EyePosition(EventPlayer());
+    L = K + 60 * 4 * FacingDirectionOf(EventPlayer());
+    AnaSleepStart = RayCastHitPosition(K, L, AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), EventPlayer(), true);
+    AnaSleepChase = RayCastHitNormal(K, L, AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), EventPlayer(), true);
+    AnaSleepStart += (1.3 * Max(0, -1 * YOf(AnaSleepChase)) + 0.715 * Max(0, 1 - 2 * YOf(AnaSleepChase) ^ 2)) * AnaSleepChase;
+    if (DistanceBetween(K, AnaSleepStart) < 60 * 4 - 2)
+    {
+        Wait(DistanceBetween(K, AnaSleepStart) / 60, WaitBehavior.IgnoreCondition);
+        ApplyImpulse(EventPlayer(), Up(), 1, Relative.ToWorld, ContraryMotion.Cancel);
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        Teleport(EventPlayer(), AnaSleepStart);
+    }
+}
+
+rule: "Sleep Dart Press"
+Event.OngoingPlayer
+Player.Ana
+if (IsUsingAbility1(EventPlayer()) == true)
+if (IsAlive(EventPlayer()) == true)
+if (HasStatus(EventPlayer(), Status.Rooted) == false)
+{
+    J = true;
+}
+
+rule: "Teleport {V3}"
+Event.OngoingPlayer
+if (J == true)
+if (IsAlive(EventPlayer()) == true)
+{
+    Wait(0.3, WaitBehavior.AbortWhenFalse);
+    K = EyePosition(EventPlayer());
+    if (HasStatus(EventPlayer(), Status.Hacked))
+    {
+        J = false;
+        Abort();
+    }
+    L = K + 60 * 4 * FacingDirectionOf(EventPlayer());
+    if (HasStatus(EventPlayer(), Status.Hacked))
+    {
+        J = false;
+        Abort();
+    }
+    AnaSleepStart = RayCastHitPosition(K, L, AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), EventPlayer(), true);
+    if (HasStatus(EventPlayer(), Status.Hacked))
+    {
+        J = false;
+        Abort();
+    }
+    AnaSleepChase = RayCastHitNormal(K, L, AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), EventPlayer(), true);
+    if (HasStatus(EventPlayer(), Status.Hacked))
+    {
+        J = false;
+        Abort();
+    }
+    AnaSleepStart += (1.3 * Max(0, -1 * YOf(AnaSleepChase)) + 0.715 * Max(0, 1 - 2 * YOf(AnaSleepChase) ^ 2)) * AnaSleepChase;
+    if (HasStatus(EventPlayer(), Status.Hacked))
+    {
+        J = false;
+        Abort();
+    }
+    if (DistanceBetween(K, AnaSleepStart) < 60 * 4 - 2)
+    {
+        if (HasStatus(EventPlayer(), Status.Hacked))
+        {
+            J = false;
+            Abort();
+        }
+        Wait(DistanceBetween(K, AnaSleepStart) / 60, WaitBehavior.IgnoreCondition);
+        if (HasStatus(EventPlayer(), Status.Hacked))
+        {
+            J = false;
+            Abort();
+        }
+        ApplyImpulse(EventPlayer(), Up(), 1, Relative.ToWorld, ContraryMotion.Cancel);
+        if (HasStatus(EventPlayer(), Status.Hacked))
+        {
+            J = false;
+            Abort();
+        }
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        Teleport(EventPlayer(), AnaSleepStart);
+        J = false;
+    }
+}
+
+rule: "Heal = Impulse {must be damaged when spawning}"
+Event.OnHealingDealt
+if (Healee() == Healer())
+if (HasStatus(EventPlayer(), Status.Rooted) == false)
+{
+    ApplyImpulse(EventPlayer(), FacingDirectionOf(EventPlayer()), -15, Relative.ToWorld, ContraryMotion.Cancel);
+    Wait(1, WaitBehavior.IgnoreCondition);
+}
+
+rule: "i F*cking hate bugs"
+Event.OngoingPlayer
+if (Health(EventPlayer()) > 199)
+{
+    Wait(0.7, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsFalse();
+    Damage(EventPlayer(), null, 49);
+    LoopIfConditionIsTrue();
+}
+
+rule: "i F*cking hate bugs part 2"
+Event.OngoingPlayer
+if (IsAlive(EventPlayer()) == true)
+if (HasSpawned(EventPlayer()) == true)
+{
+    SetMaxHealth(EventPlayer(), 52);
+    SetMaxHealth(EventPlayer(), 200);
+    MinWait();
+    Heal(EventPlayer(), null, 1);
+}
+
+rule: "Primary Pulse"
+Event.OngoingPlayer
+Player.Ana
+if (IsFiringPrimary(EventPlayer()) == true)
+if (HasStatus(EventPlayer(), Status.Rooted) == false)
+{
+    SetGravity(EventPlayer(), 0);
+    ApplyImpulse(EventPlayer(), FacingDirectionOf(EventPlayer()), 15, Relative.ToWorld, ContraryMotion.Cancel);
+    Wait(0.06, WaitBehavior.IgnoreCondition);
+    SetGravity(EventPlayer(), 100);
+}
+
+disabled rule: "text related sh*t"
+{
+}
+
+rule: "Toggle TextGuide"
+Event.OngoingPlayer
+if (IsGameInProgress() == true)
+if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+if (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == true)
+{
+    if (TextGuideEnabled == false)
+    {
+        TextGuideEnabled = true;
+    }
+    else if (TextGuideEnabled == true)
+    {
+        TextGuideEnabled = false;
+    }
+}
+
+rule: "Create TextGuide"
+Event.OngoingPlayer
+if (IsGameInProgress() == true)
+if (TextGuideEnabled == true)
+{
+    CreateHudText(EventPlayer(), "Shots launch you in the direction you fire", null, null, Location.Top, 10, Color.Turquoise, Color.Aqua, Color.Aqua, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextGuideID[1] = LastTextID();
+    CreateHudText(EventPlayer(), "Sleep will teleport you where you hit", null, null, Location.Top, 11, Color.Turquoise, Color.LimeGreen, Color.LimeGreen, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextGuideID[2] = LastTextID();
+    CreateHudText(EventPlayer(), "When healed by the nade, you get thrown the opposite direction", null, null, Location.Top, 12, Color.Turquoise, Color.LimeGreen, Color.LimeGreen, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    TextGuideID[3] = LastTextID();
+}
+
+rule: "Destroy TextGuide"
+Event.OngoingPlayer
+if (TextGuideEnabled == false)
+{
+    DestroyHudText(TextGuideID[1]);
+    DestroyHudText(TextGuideID[2]);
+    DestroyHudText(TextGuideID[3]);
+}
+
+rule: "Parkour Codes Discord - discord.io/overwatch-parkour"
+Event.OngoingPlayer
+{
+    CreateHudText(EventPlayer(), null, "", "Parkour Codes: discord.io/overwatch-parkour", Location.Right, 5, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, "", "Press Crouch And Secondary Fire to toggle a guide", Location.Right, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(EventPlayer(), "", null, "Hold Q and Interact to try again", Location.Left, 7, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "SkyBarrier Kill Fix {V.2}"
+Event.OngoingPlayer
+# Junkertown
+if (YOf(PositionOf(EventPlayer())) > 29.08)
+{
+    Kill(EventPlayer(), null);
+}
+
+rule: "Effects for Checkpoints with no ring generated"
+if (IsGameInProgress() == true)
+{
+    # Sparkle Finish
+    CreateEffect(AllPlayers(Team.All), Effect.Sparkles, Color.Orange, Vector(-89.31, 8.614, -104.141), 1, EffectRev.VisibleToPositionAndRadius);
+    # Green glow checkpoint
+    CreateEffect(AllPlayers(Team.All), Effect.Cloud, Color.Green, Vector(30.284, 11.5, -81.664), 1, EffectRev.VisibleToPositionAndRadius);
+    # Green glow checkpoint
+    CreateEffect(AllPlayers(Team.All), Effect.Cloud, Color.Green, Vector(-13.456, 9, -32.082), 1, EffectRev.VisibleToPositionAndRadius);
+}
+
+rule: "Keep scoreboard up to date"
+Event.OngoingPlayer
+if (playerStageIndex + 1 != __playerScore)
+{
+    __playerScore = playerStageIndex + 1;
+}
+
+rule: "Toggle scoreboard"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if ((IsButtonHeld(EventPlayer(), Button.Crouch) && IsButtonHeld(EventPlayer(), Button.Interact)) == true)
+{
+    __hideScoreboard = !__hideScoreboard;
+}
+
+globalvar Boolean endGameFlag;
+
+Boolean playerCompleted(Player p): (p.playerIsTimerEnabled && p.playerStageIndex == CountOf(Origins) - 1);
+
+rule: "When run is complete"
+Event.OngoingPlayer
+if ((mapIsPlayable && HasSpawned(EventPlayer())) == true)
+if (playerCompleted(EventPlayer()) == true)
+{
+    SmallMessage(AllPlayers(), <"<0> Finished!", EventPlayer()>);
+    PlayEffect(AllPlayers(), PlayEffect.BuffExplosionSound, null, LastOf(Origins), 200);
+    endGameFlag = true;
+}
+
+globalvar Number timeToComplete = WorkshopSettingReal("Settings", "Wait Time after a player finishes", 60, 0, 300);
+
+rule: "When the game is in the end game, give time to finish"
+Event.OngoingGlobal
+if (endGameFlag)
+{
+    SetMatchTime(timeToComplete);
+    MinWait();
+    SmallMessage(AllPlayers(), <"Game ends in <0>!", RoundToInteger(timeToComplete, Rounding.Nearest)>);
+}
+
+rule: "When time runs out or all finish, declare the victor"
+Event.OngoingGlobal
+if (startGameFlag)
+if (MatchTime() == 0 || IsTrueForAll(AllPlayers(), playerCompleted(ArrayElement())))
+{
+    CreateHudText(AllPlayers(), <"<0> Wins!", FirstOf(scoreboardArray)>, HeaderColor: Color.Yellow, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, null, LastOf(Origins), 200);
+    Wait(3);
+    DeclareTeamVictory(Team.Team1);
+}
+
+rule: "When match is complete, skip POTG"
+if (IsMatchComplete())
+{
+    Wait(8);
+    ReturnToLobby();
+}
+
+import "scoreboard.ostw";
