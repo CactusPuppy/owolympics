@@ -1,0 +1,125 @@
+import "soldierSprint.lobby";
+
+globalvar Vector startPoint = Vector(5, -7, 110);
+globalvar Vector endPoint = Vector(110, .7, 216);
+globalvar Vector endLineDir = Vector(-1, 0, 1);
+globalvar Number pointsToAward = WorkshopSettingInteger("Settings", "Max Points", 3, 1, 12);
+Vector point1: endPoint - 10*endLineDir;
+Vector point2: endPoint + 10*endLineDir;
+Number finishLineAngle(Player p): AngleDifference(
+    HorizontalAngleFromDirection(endLineDir),
+    HorizontalAngleFromDirection(PositionOf(p) - point1)
+);
+
+rule: "DEBUG: Show position"
+{
+    CreateHudText(AllPlayers(), <"<0>", finishLineAngle(LocalPlayer())>);
+}
+
+disabled rule: "DEBUG: Make players invulnerable"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()))
+if (IsAlive(EventPlayer()))
+{
+    SetStatus(EventPlayer(), null, Status.Invincible, 1000000);
+}
+
+rule: "Global setup"
+{
+    DisableScoring();
+    DisableAnnouncer();
+    CreateBeamEffect(AllPlayers(), BeamType.BadBeam, point1, point2, Color.Aqua, EffectRev.VisibleTo);
+}
+
+rule: "Spawn players at the start"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()))
+if (IsAlive(EventPlayer()))
+{
+    ForcePlayerHero(EventPlayer(), Hero.Soldier76);
+    Teleport(EventPlayer(), startPoint + 10*Up());
+    StartFacing(EventPlayer(), DirectionTowards(startPoint, endPoint), 1000, Relative.ToWorld);
+    WaitUntil(AngleBetweenVectors(FacingDirectionOf(EventPlayer()),  DirectionTowards(startPoint, endPoint)) < 1, 9999);
+    StopFacing(EventPlayer());
+    SetStatus(EventPlayer(), null, Status.Invincible, IsGameInProgress() ? 5 : 9999);
+    WaitUntil(!HasStatus(EventPlayer(), Status.Invincible), 9999);
+    SmallMessage(EventPlayer(), "Spawn Protection has expired");
+}
+
+rule: "Handle start of game"
+Event.OngoingPlayer
+if (HasSpawned())
+if (IsAlive())
+if (IsGameInProgress() == false)
+if (IsMatchComplete() == false)
+{
+    DisableRespawning(EventPlayer());
+    StartForcingPlayerPosition(EventPlayer(), startPoint + 10*Up());
+    WaitUntil(IsGameInProgress(), 9999);
+    StartHealOverTime(EventPlayer(), null, 1000000, 20);
+    StopForcingPlayerPosition(EventPlayer());
+    Wait(3);
+    ClearStatus(EventPlayer(), Status.Invincible);
+}
+
+rule: "Player fell off"
+Event.OngoingPlayer
+if (IsGameInProgress() == true)
+if (YOf(PositionOf(EventPlayer())) < -15)
+if (IsAlive(EventPlayer()) == true)
+{
+    Wait(.1, WaitBehavior.AbortWhenFalse);
+    Kill(EventPlayer(), null);
+}
+
+rule: "Handle player death"
+Event.OnDeath
+if (IsGameInProgress() == true)
+// if (!EventWasEnvironment())
+{
+    ClearStatus(EventPlayer(), Status.Invincible);
+    if (YOf(PositionOf(EventPlayer())) >= -8.7) {
+        Wait(1);
+    } else {
+        Wait(3);
+    }
+    Respawn(EventPlayer());
+}
+
+rule: "Player finished!"
+Event.OngoingPlayer
+if (finishLineAngle(EventPlayer()) > 0)
+if (IsGameInProgress())
+if (IsAlive())
+if (HasStatus(Status: Status.Invincible) == false)
+if (HasStatus(Status: Status.PhasedOut) == false)
+
+{
+    BigMessage(AllPlayers(), <"<0> Finished!", EventPlayer()>);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound,  null, endPoint, 200);
+    ModifyPlayerScore(EventPlayer(), pointsToAward);
+    pointsToAward -= 1;
+    Teleport(EventPlayer(), Vector(118, 1.5, 222));
+    SetFacing(Direction: DirectionTowards(endPoint, startPoint), Relative: Relative.ToWorld);
+    SetStatus(EventPlayer(), null, Status.Rooted, 1000000);
+    SetStatus(EventPlayer(), null, Status.Invincible, 1000000);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 1000000);
+    SetKnockbackDealt(EventPlayer(), 0);
+    SetPrimaryFireEnabled(Enabled: false);
+    SetSecondaryFireEnabled(Enabled: false);
+}
+
+rule: "End the game"
+Event.OngoingGlobal
+if (
+    CountOf(
+        FilteredArray(AllPlayers(),
+            ScoreOf(ArrayElement()) == 0
+        )
+    ) == 0
+    || (IsGameInProgress() && MatchTime() == 0)
+    || pointsToAward == 0
+)
+{
+    DeclarePlayerVictory(LastOf(SortedArray(AllPlayers(), ScoreOf(ArrayElement()))));
+}

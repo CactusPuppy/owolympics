@@ -1,0 +1,36 @@
+{
+  "Lobby": {
+    "Allow Players Who Are In Queue": true,
+    "Match Voice Chat": true,
+    "Max Spectators": 4,
+    "Return To Lobby": "Never"
+  },
+  "Modes": {
+    "All": {
+      "Allow Hero Switching": false,
+      "Game Mode Start": "Immediately",
+      "Respawn As Random Hero": true
+    },
+    "Deathmatch": {
+      "Enabled Maps": [
+        "Oasis City Center"
+      ],
+      "Game Length In Minutes": 15,
+      "Score To Win": 31,
+      "Self Initiated Respawn": false
+    }
+  },
+  "Heroes": {
+    "General": {
+      "General": {
+        "Ability Cooldown Time": 75.0,
+        "Damage Dealt": 30.0
+      },
+      "Soldier: 76": {
+        "Biotic Field": false,
+        "Helix Rockets Knockback Scalar": 150
+      }
+    }
+  },
+  "Description": "Elo Hell Workshop Olympics - Soldier Hurdle"
+}
