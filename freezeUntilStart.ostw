@@ -1,0 +1,47 @@
+globalvar Boolean startGameFlag;
+globalvar Number countdownTimer;
+
+rule: "While waiting for everyone to spawn, explain why not moving"
+if (startGameFlag == false)
+{
+    SmallMessage(AllPlayers(), "Waiting for Players");
+    Wait(5,WaitBehavior.AbortWhenFalse);
+    LoopIfConditionIsTrue();
+}
+
+rule: "Freeze Player Until Game Starts"
+Event.OngoingPlayer
+{
+    WaitUntil(HasSpawned(EventPlayer()), 1000000);
+    SetStatus(EventPlayer(), null, Status.Rooted, 1000000);
+    WaitUntil(startGameFlag, 1000000);
+    ClearStatus(EventPlayer(), Status.Rooted);
+}
+
+rule: "Start Countdown"
+if (CountOf(AllPlayers()) > 0)
+if (IsTrueForAll(AllPlayers(), HasSpawned(ArrayElement())))
+{
+    Wait(3, WaitBehavior.AbortWhenFalse);
+    countdownTimer = 5;
+    SmallMessage(AllPlayers(), "5");
+    PlayEffect(AllPlayers(), PlayEffect.BuffImpactSound, null, FirstOf(AllPlayers()), 200);
+    ChaseVariableAtRate(countdownTimer, 0, 1, RateChaseReevaluation.None);
+    WaitUntil(countdownTimer <= 4, 10);
+    SmallMessage(AllPlayers(), "4");
+    PlayEffect(AllPlayers(), PlayEffect.BuffImpactSound, null, FirstOf(AllPlayers()), 200);
+    WaitUntil(countdownTimer <= 3, 10);
+    SmallMessage(AllPlayers(), "3");
+    PlayEffect(AllPlayers(), PlayEffect.BuffImpactSound, null, FirstOf(AllPlayers()), 200);
+    WaitUntil(countdownTimer <= 2, 10);
+    SmallMessage(AllPlayers(), "2");
+    PlayEffect(AllPlayers(), PlayEffect.BuffImpactSound, null, FirstOf(AllPlayers()), 200);
+    WaitUntil(countdownTimer <= 1, 10);
+    SmallMessage(AllPlayers(), "1");
+    PlayEffect(AllPlayers(), PlayEffect.BuffImpactSound, null, FirstOf(AllPlayers()), 200);
+    WaitUntil(countdownTimer <= 0, 10);
+    SmallMessage(AllPlayers(), "GO");
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, null, FirstOf(AllPlayers()), 200);
+    startGameFlag = true;
+    UnpauseMatchTime();
+}
