@@ -1,0 +1,37 @@
+{
+  "Lobby": {
+    "Allow Players Who Are In Queue": false,
+    "Match Voice Chat": true,
+    "Return To Lobby": "After A Game",
+    "Max Team 1 Players": 12,
+    "Max Team 2 Players": 0
+  },
+  "Modes": {
+    "All": {
+      "Allow Hero Switching": false,
+      "Game Mode Start": "Manual",
+      "Hero Limit": "Off",
+      "Respawn Time Scalar": 0.0
+    },
+    "Skirmish": {
+      "Enabled Maps": [
+        "Lijiang Tower"
+      ]
+    }
+  },
+  "Heroes": {
+    "General": {
+      "Enabled Heroes": [
+        "Lúcio"
+      ],
+      "Lúcio": {
+        "Healing Received": 500.0,
+        "Health": 500.0,
+        "Primary Fire": false,
+        "Soundwave": false,
+        "Ultimate Ability (Sound Barrier)": false
+      }
+    }
+  },
+  "Description": "v1.15: Lucio Ring Race! Speed through the rings to get the best time! - Initially created by waycoolway - Heavily updated by Giacomand - Additional maps by Fahzix and GreenOxygen - https://workshop.codes/lucio-ring-race"
+}

@@ -1,0 +1,396 @@
+import "lucioSurf.lobby";
+
+globalvar define StartingPosition;
+globalvar define CheckpointList;
+globalvar define CheckpointRadius;
+globalvar define DebugEnabled;
+globalvar define MapVoteTimeStart;
+globalvar define MapVoteDuration;
+globalvar define LoopIndex;
+globalvar define MapEditorCheckpointList;
+globalvar define BestRecordsNameList;
+globalvar define TeleportEntranceList;
+globalvar define TeleportExitList;
+globalvar define VotingForNewMap;
+globalvar define StartingPositionRadius;
+globalvar define BestRecordsTimeList;
+playervar define NewCheckpointLocation;
+playervar define CurrentCheckpointID;
+playervar define RaceTime;
+playervar define PlayerLoopIndex;
+playervar define LastCreatedSpeedometerID;
+playervar define RespawningSelf;
+playervar define Spawning;
+playervar define VotedForNewMap;
+playervar define InSavingMode;
+playervar define BestTime;
+playervar define D_;
+playervar define E_;
+playervar define G_;
+playervar define p_Y;
+globalvar define A_;
+globalvar define B_;
+globalvar define H_;
+globalvar define Y_;
+globalvar define F_;
+playervar define T_;
+
+rule: "ON: Assembling Heroes"
+if (IsAssemblingHeroes() == true)
+{
+    SetMatchTime(0);
+}
+
+rule: "ON: Setup"
+if (IsInSetup() == true)
+{
+    SetMatchTime(0);
+}
+
+rule: "Force player to spawn in"
+Event.OngoingPlayer
+{
+    while (!HasSpawned(EventPlayer())) {
+        ForcePlayerHero(EventPlayer(), Hero.Lucio);
+        Wait(0.25);
+    }
+    StopForcingHero(EventPlayer());
+}
+
+rule: "MAP: Lijiang Tower Rings by Giacomand"
+// if (DistanceBetween(NearestWalkablePosition(Vector(0, 0, 0)), Vector(5.88, 0, -10.13)) < 0.01)
+if (CurrentMap() == Map.Lijiang_Tower)
+{
+    StartingPosition = Vector(-65.501, 4.839, -32.011);
+    StartingPosition = Vector(-55.359, 266.173, 326.081);
+    StartingPosition = Vector(-64.012, 99.177, 162.586);
+    TeleportEntranceList = [];
+    TeleportExitList = [];
+    ModifyVariable(TeleportEntranceList, Operation.AppendToArray, Vector(53, 95, 149));
+    ModifyVariable(TeleportExitList, Operation.AppendToArray, Vector(-65.5, 5, -32));
+    ModifyVariable(TeleportEntranceList, Operation.AppendToArray, Vector(61, 21, -14));
+    ModifyVariable(TeleportExitList, Operation.AppendToArray, Vector(-54.338, 266.176, 325.986));
+    CheckpointList = [];
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-60, 100, 148));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-51, 102, 142));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-15, 97, 148));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-4, 99, 160));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(15, 97, 147));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(10, 97, 115));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-6, 97, 108));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-18, 96, 124));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-7, 99, 157));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-9, 104, 189));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-25, 98, 186));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-60, 99, 170));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-50, 102, 142));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-14, 99, 133));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(15, 98, 134));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(36, 97, 150));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(49, 96, 149));
+    SkipIf(true == false, 10000);
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-53, 4, -34));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-39, 3, -42));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-12, 5, -54));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-8, 10, -70));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(10, 10, -70));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(13, 5, -44));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(21, 9, -24));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(15, 15, -10));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(22, 19, -50));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(34, 11, -68));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(44, 10, -48));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(46, 22, -15));
+    SkipIf(true == false, 10000);
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-33, 269, 311));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-8, 270, 277));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(14, 277, 274));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(0, 283, 294));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(5, 275, 264));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(26, 274, 278));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(45, 271, 305));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(35, 270, 338));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(24, 272, 341));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(9, 272, 319));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(-5, 274, 293));
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(0, 274, 280));
+    SkipIf(true == true, 10000);
+    ModifyVariable(CheckpointList, Operation.AppendToArray, Vector(0, 0, 0));
+}
+
+rule: "SETUP: Global Vars"
+{
+    A_ = false;
+    B_ = 5;
+    H_ = 0;
+    Y_ = [];
+    StartingPositionRadius = 4;
+    CreateInWorldText(FilteredArray(AllPlayers(Team.All), ArrayElement().RespawningSelf != true), <"<0>: [<1>]", @"Try_Again", InputBindingString(Button.Crouch)>, DirectionTowards(StartingPosition, CheckpointList[0]) * StartingPositionRadius + StartingPosition, 2, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    MapVoteTimeStart = 900;
+    MapVoteDuration = 45;
+    DisableCompletion();
+    SetObjectiveDescription(AllPlayers(Team.All), "RACE", HudTextRev.VisibleToAndString);
+    CreateHudText(AllPlayers(Team.All), null, "LUCIO RING RACE - CODE: PE3A4", null, Location.Top, -1, Color.Green, Color.Green, Color.Green, HudTextRev.VisibleToAndString, Spectators.VisibleAlways);
+    UpdateLeaderboard();
+}
+
+rule: "SETUP: Player Vars"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()) == true)
+{
+    CurrentCheckpointID = 0;
+    RaceTime = 0;
+    BestTime = 999.99;
+    CreateInWorldText(AllPlayers(Team.All), <@"<0>: <1>", @"Time", RaceTime>, EventPlayer(), 2, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, null, <@"<0>: <1>", @"Time", <@"<0> sec", RaceTime>>, Location.Left, -10, Color.White, Color.Red, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, null, <@"<0>: <1>", <@"<0> <1>", @"Best", @"Record">, <@"<0> sec", BestTime>>, Location.Left, -9, Color.White, Color.Red, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    Spawning = true;
+    CreateIcon(FilteredArray(EventPlayer(), !IsInViewAngle(ArrayElement(), CheckpointList[ArrayElement().CurrentCheckpointID], 103) || !IsInLineOfSight(EyePosition(ArrayElement()), CheckpointList[ArrayElement().CurrentCheckpointID], BarrierLOS.NoBarriersBlock)), CheckpointList[CurrentCheckpointID], Icon.RingThick, IconRev.VisibleToAndPosition, Color.Green, true);
+    DisableMovementCollisionWithPlayers(EventPlayer());
+}
+
+rule: "SETUP: Checkpoint Vars"
+{
+    F_ = 2;
+    CheckpointRadius = 3;
+}
+
+rule: "SETUP: Time Records"
+{
+    CreateHudText(AllPlayers(Team.All), null, <@"<0> <1>", @"Best", @"Times">, null, Location.Right, -5, Color.White, Color.Red, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(AllPlayers(Team.All), null, null, <@"<0> <1>", <@"#<0>", 1>, <@"<0> - <1>", BestRecordsNameList[0], <@"<0> sec", BestRecordsTimeList[0]>>>, Location.Right, -4, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(AllPlayers(Team.All), null, null, <@"<0> <1>", <@"#<0>", 2>, <@"<0> - <1>", BestRecordsNameList[1], <@"<0> sec", BestRecordsTimeList[1]>>>, Location.Right, -3, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(AllPlayers(Team.All), null, null, <@"<0> <1>", <@"#<0>", 3>, <@"<0> - <1>", BestRecordsNameList[2], <@"<0> sec", BestRecordsTimeList[2]>>>, Location.Right, -2, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(AllPlayers(Team.All), null, null, <@"<0>: <1>", "CODE", "PE3A4">, Location.Top, -10, Color.Yellow, Color.Yellow, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "SETUP: Create Rings"
+Event.OngoingPlayer
+{
+    CreateEffect(EventPlayer(), Effect.GoodAura, Color.Green, CheckpointList[CurrentCheckpointID], F_, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(EventPlayer(), Effect.GoodAura, Color.Yellow, CheckpointList[1 + CurrentCheckpointID], F_, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(EventPlayer(), Effect.GoodAura, Color.Red, CheckpointList[2 + CurrentCheckpointID], F_, EffectRev.VisibleToPositionAndRadius);
+}
+
+rule: "SETUP: Create Teleporters"
+if (CountOf(TeleportEntranceList) > 0)
+{
+    CreateEffect(AllPlayers(Team.All), Effect.LightShaft, Color.Purple, TeleportEntranceList[LoopIndex] + Vector(0, -1, 0), CheckpointRadius, EffectRev.VisibleTo);
+    CreateEffect(AllPlayers(Team.All), Effect.LightShaft, Color.Blue, TeleportExitList[LoopIndex] + Vector(0, -1, 0), CheckpointRadius, EffectRev.VisibleTo);
+    LoopIndex += 1;
+    MinWait();
+    LoopIf(LoopIndex < CountOf(TeleportEntranceList));
+}
+
+rule: "SETUP: Create Spawn Ring"
+{
+    CreateEffect(AllPlayers(Team.All), Effect.Ring, Color.Blue, StartingPosition, StartingPositionRadius, EffectRev.VisibleToPositionAndRadius);
+}
+
+rule: "SETUP: Match Timer"
+if (A_ == true)
+{
+    ChaseVariableOverTime(H_, 500, 500.001, TimeChaseReevaluation.DestinationAndDuration);
+}
+
+rule: "ON: Player Spawning (Disable to stop forced spawns)"
+Event.OngoingPlayer
+if ((Spawning || IsButtonHeld(EventPlayer(), Button.Crouch)) == true)
+{
+    SkipIf(!IsButtonHeld(EventPlayer(), Button.Crouch), 1);
+    RespawningSelf = true;
+    Resurrect(EventPlayer());
+    SkipIf(StartingPosition == 0, 1);
+    Teleport(EventPlayer(), StartingPosition);
+    SetFacing(EventPlayer(), DirectionTowards(StartingPosition, Vector(XOf(FirstOf(CheckpointList)), YOf(PositionOf(EventPlayer())), ZOf(FirstOf(CheckpointList)))), Relative.ToWorld);
+    CurrentCheckpointID = 0;
+    RaceTime = 0;
+    // SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    Spawning = false;
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    SetAbilityCooldown(EventPlayer(), Button.Ability2, 0);
+    SetStatus(EventPlayer(), null, Status.Stunned, 0.05);
+}
+
+rule: "ON: Player Death"
+Event.OnDeath
+{
+    Wait(1, WaitBehavior.IgnoreCondition);
+    Spawning = true;
+}
+
+rule: "ON: Collision of Rings"
+Event.OngoingPlayer
+if (ArrayContains(PlayersWithinRadius(CheckpointList[CurrentCheckpointID], CheckpointRadius + 0.5, Team.All, RadiusLOS.Off), EventPlayer()) == true)
+{
+    CurrentCheckpointID += 1;
+    SmallMessage(EventPlayer(), <@"<0> / <1>", CurrentCheckpointID, CountOf(CheckpointList)>);
+    PlayEffect(EventPlayer(), PlayEffect.RingExplosionSound, Color.White, EventPlayer(), 75);
+}
+
+rule: "ON: Collision with Teleporter"
+Event.OngoingPlayer
+if (CountOf(TeleportEntranceList) > 0)
+if (IsTrueForAny(TeleportEntranceList, ArrayContains(PlayersWithinRadius(ArrayElement(), CheckpointRadius + 0.5, Team.All, RadiusLOS.Off), EventPlayer()) == true) == true)
+{
+    SkipIf(PlayerLoopIndex > 0, 1);
+    PlayerLoopIndex = CountOf(TeleportEntranceList) - 1;
+    T_ = TeleportEntranceList[PlayerLoopIndex];
+    SkipIf(DistanceBetween(T_, EventPlayer()) < CheckpointRadius + 0.5, 3);
+    PlayerLoopIndex -= 1;
+    MinWait();
+    LoopIf(PlayerLoopIndex > 0);
+    BigMessage(EventPlayer(), <@"<0> sec", RaceTime>);
+    Teleport(EventPlayer(), TeleportExitList[PlayerLoopIndex]);
+    PlayerLoopIndex = 0;
+}
+
+rule: "ON: Finished Race - Announcement & Respawn"
+Event.OngoingPlayer
+if (CountOf(CheckpointList) != 0)
+if (CurrentCheckpointID == CountOf(CheckpointList))
+if (DebugEnabled != true)
+{
+    BigMessage(EventPlayer(), <@"<0>: <1>", @"Finished", RaceTime>);
+    Spawning = true;
+}
+
+rule: "ON: Finished Race - Update Personal Record"
+Event.OngoingPlayer
+if (CurrentCheckpointID == CountOf(CheckpointList))
+{
+    BestTime = Min(RaceTime, BestTime);
+    UpdateLeaderboard();
+}
+
+rule: "ON: Player Leaves Spawn"
+Event.OngoingPlayer
+if (DistanceBetween(StartingPosition, PositionOf(EventPlayer())) >= StartingPositionRadius)
+if (CurrentCheckpointID <= 0)
+{
+    ChaseVariableOverTime(RaceTime, 9999, 9999, TimeChaseReevaluation.DestinationAndDuration);
+}
+
+rule: "ON: Player In Spawn"
+Event.OngoingPlayer
+if (DistanceBetween(StartingPosition, PositionOf(EventPlayer())) < StartingPositionRadius)
+if (CurrentCheckpointID <= 0)
+{
+    StopChasingVariable(RaceTime);
+    RaceTime = 0;
+}
+
+rule: "ON: Speedometer"
+Event.OngoingPlayer
+// if (HorizontalSpeedOf(EventPlayer()) <= 12)
+{
+    // DestroyHudText(LastCreatedSpeedometerID);
+    CreateHudText(EventPlayer(), null, null, <@"<0> m/s", HorizontalSpeedOf(EventPlayer())>, Location.Left, -101, Color.White, Color.White, HorizontalSpeedOf(EventPlayer()) >= 12 ? Color.Green : Color.Yellow, HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+    // LastCreatedSpeedometerID = LastTextID();
+}
+
+void UpdateLeaderboard() "ON: Update Records"
+{
+    BestRecordsNameList = ArraySlice(SortedArray(FilteredArray(FilteredArray(AllPlayers(Team.All), HasSpawned(ArrayElement())), ArrayElement().BestTime < 999.99), ArrayElement().BestTime), 0, 3);
+    BestRecordsTimeList[0] = BestRecordsNameList[0].BestTime;
+    BestRecordsTimeList[1] = BestRecordsNameList[1].BestTime;
+    BestRecordsTimeList[2] = BestRecordsNameList[2].BestTime;
+    if (BestRecordsNameList[0] == null)
+    {
+        BestRecordsNameList[0] = Hero.Lucio;
+        BestRecordsTimeList[0] = 999.99;
+    }
+    if (BestRecordsNameList[1] == null)
+    {
+        BestRecordsNameList[1] = Hero.Lucio;
+        BestRecordsTimeList[1] = 999.99;
+    }
+    if (BestRecordsNameList[2] == null)
+    {
+        BestRecordsNameList[2] = Hero.Lucio;
+        BestRecordsTimeList[2] = 999.99;
+    }
+}
+
+disabled rule: "SETUP: Voting UI"
+{
+    CreateHudText(FilteredArray(AllPlayers(Team.All), VotingForNewMap == true), null, "Map Vote", "Use 'Interact' (F) to toggle your vote", Location.Left, 20, Color.White, Color.Red, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), VotingForNewMap == true), null, null, <"Total Votes: <0> / <1>", CountOf(FilteredArray(AllPlayers(Team.All), ArrayElement().VotedForNewMap == true)), RoundToInteger(CountOf(AllPlayers(Team.All)) * 0.5, Rounding.Up)>, Location.Left, 21, Color.White, Color.Red, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), VotingForNewMap == true), null, null, <"Time Remaining: <0> sec", MatchTime() - (MapVoteTimeStart - MapVoteDuration)>, Location.Left, 22, Color.White, Color.Red, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(AllPlayers(Team.All), VotingForNewMap == true && ArrayElement().VotedForNewMap == true), null, null, "You have voted 'Yes'", Location.Left, 23, Color.White, Color.Red, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+disabled rule: "ON: Voting Started"
+if (MatchTime() <= MapVoteTimeStart)
+if (DebugEnabled != true)
+if (AllPlayers(Team.All) != HostPlayer())
+{
+    BigMessage(AllPlayers(Team.All), "NEW MAP VOTE STARTED");
+    VotingForNewMap = true;
+    Wait(6, WaitBehavior.IgnoreCondition);
+    BigMessage(AllPlayers(Team.All), "Use 'Interact' (F) to vote!");
+}
+
+disabled rule: "ON: Voted For New Map"
+Event.OngoingPlayer
+if (VotingForNewMap == true)
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+{
+    VotedForNewMap = !VotedForNewMap;
+    BigMessage(EventPlayer(), "Vote Toggled");
+}
+
+disabled rule: "ON: Voting Finished"
+if (MatchTime() <= MapVoteTimeStart - MapVoteDuration)
+{
+    VotingForNewMap = false;
+    SkipIf(CountOf(FilteredArray(AllPlayers(Team.All), ArrayElement().VotedForNewMap == true)) >= CountOf(AllPlayers(Team.All)) * 0.5, 2);
+    BigMessage(AllPlayers(Team.All), "Vote Failed");
+    Abort();
+    BigMessage(AllPlayers(Team.All), "Vote Successful - 60 seconds remain");
+    SetMatchTime(60);
+}
+
+rule: "ENABLE FOR FAST ROUNDS"
+if (IsGameInProgress() == true)
+if (DebugEnabled == false)
+{
+    SetMatchTime(600);
+    PauseMatchTime();
+    WaitUntil(startGameFlag, 1000000);
+    UnpauseMatchTime();
+}
+
+rule: "ON: End Game"
+if (MatchTime() <= 0)
+{
+    BigMessage(AllPlayers(Team.All), <@"<0> <1>", BestRecordsNameList[0], @"Wins">);
+    Wait(5, WaitBehavior.IgnoreCondition);
+    // DeclareMatchDraw();
+    // EnableCompletion();
+    DeclareTeamVictory(TeamOf(BestRecordsNameList[0]));
+}
+
+rule: "Early exit when game ends"
+if (IsMatchComplete())
+{
+    Wait(8);
+    ReturnToLobby();
+}
+
+rule: "ON: End Game [Player]"
+Event.OngoingPlayer
+if (MatchTime() <= 0)
+{
+    StartForcingPlayerPosition(EventPlayer(), PositionOf(EventPlayer()), false);
+    SetStatus(EventPlayer(), null, Status.Frozen, 1000000);
+    PlayEffect(EventPlayer(), PlayEffect.RingExplosionSound, null, PositionOf(EventPlayer()), 200);
+}
+
+rule: "ON: Player Leaves"
+Event.OnPlayerLeave
+{
+    UpdateLeaderboard();
+}
+
+import "freezeUntilStart.ostw";
